@@ -207,80 +207,95 @@ const Dashboard = () => {
   };
 
   const AlertItem = ({ alert, onAmountClick, onNotesClick, onUpdateClick, onOrderClick }) => (
-    <div className="p-4 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors">
-      <div className="flex items-center justify-between mb-2">
-        <div className="flex items-center justify-between w-full">
-          <h4 className="text-sm font-semibold text-gray-800">{alert.customerName}</h4>
-          <div className="flex items-center space-x-2">
-            <button
-              onClick={() => onAmountClick(alert)}
-              className="p-1.5 text-blue-600 hover:text-blue-800 hover:bg-blue-100 rounded transition-colors"
-              title="Edit Amount"
-            >
-              <DollarSign className="w-4 h-4" />
-            </button>
-            
-            <div className="relative">
+    <div className="bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors">
+      {/* Single Row with 6 Columns */}
+      <div className="flex items-center justify-between p-3">
+        {/* Column 1: Customer Name */}
+        <div className="flex-1 min-w-0">
+          <h4 className="text-sm font-semibold text-gray-800 truncate">{alert.customerName}</h4>
+        </div>
+        
+        {/* Column 2: Order ID */}
+        <div className="flex-1 min-w-0 px-2">
+          <button
+            onClick={() => onOrderClick(alert.orderId)}
+            className="flex items-center text-sm text-blue-600 hover:text-blue-800 font-medium transition-colors"
+          >
+            {alert.orderId}
+            <ExternalLink className="w-3 h-3 ml-1" />
+          </button>
+        </div>
+        
+        {/* Column 3: Amount Icon */}
+        <div className="px-1">
+          <button
+            onClick={() => onAmountClick(alert)}
+            className="p-1.5 text-blue-600 hover:text-blue-800 hover:bg-blue-100 rounded transition-colors"
+            title="Edit Amount"
+          >
+            <DollarSign className="w-4 h-4" />
+          </button>
+        </div>
+        
+        {/* Column 4: Mark as Paid Icon */}
+        <div className="px-1 relative">
+          <button
+            onClick={() => onUpdateClick(alert.id)}
+            className="p-1.5 text-green-600 hover:text-green-800 hover:bg-green-100 rounded transition-colors"
+            title="Update Status"
+          >
+            <ChevronDown className="w-4 h-4" />
+          </button>
+          
+          {showUpdateDropdown === alert.id && (
+            <div className="absolute top-full right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-10 min-w-[140px]">
               <button
-                onClick={() => onUpdateClick(alert.id)}
-                className="p-1.5 text-green-600 hover:text-green-800 hover:bg-green-100 rounded transition-colors"
-                title="Update Status"
+                onClick={() => handleStatusUpdate(alert.type, alert.id, 'paid')}
+                className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 rounded-t-lg"
               >
-                <ChevronDown className="w-4 h-4" />
+                Mark as Paid
               </button>
-              
-              {showUpdateDropdown === alert.id && (
-                <div className="absolute top-full right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-10 min-w-[140px]">
-                  <button
-                    onClick={() => handleStatusUpdate(alert.type, alert.id, 'paid')}
-                    className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 rounded-t-lg"
-                  >
-                    Mark as Paid
-                  </button>
-                  <button
-                    onClick={() => handleStatusUpdate(alert.type, alert.id, 'uncollectible')}
-                    className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 rounded-b-lg"
-                  >
-                    Mark as Uncollectible
-                  </button>
-                </div>
-              )}
+              <button
+                onClick={() => handleStatusUpdate(alert.type, alert.id, 'uncollectible')}
+                className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 rounded-b-lg"
+              >
+                Mark as Uncollectible
+              </button>
             </div>
-            
-            <button
-              onClick={() => onNotesClick(alert)}
-              className="p-1.5 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded transition-colors"
-              title="Edit Notes"
-            >
-              <FileText className="w-4 h-4" />
-            </button>
+          )}
+        </div>
+        
+        {/* Column 5: Notes Icon */}
+        <div className="px-1">
+          <button
+            onClick={() => onNotesClick(alert)}
+            className="p-1.5 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded transition-colors"
+            title="Edit Notes"
+          >
+            <FileText className="w-4 h-4" />
+          </button>
+        </div>
+        
+        {/* Column 6: Amount */}
+        <div className="flex-shrink-0 text-right min-w-[80px]">
+          <span className={`text-sm font-semibold ${
+            alert.amountOwed === 'Pending' 
+              ? 'text-orange-600 bg-orange-100 px-2 py-1 rounded-full' 
+              : 'text-green-700'
+          }`}>
+            {alert.amountOwed}
+          </span>
+        </div>
+      </div>
+
+      {/* Notes Row (only shows if notes exist) */}
+      {alert.notes && (
+        <div className="px-3 pb-3">
+          <div className="p-2 bg-blue-50 border border-blue-200 rounded text-xs text-blue-800">
+            <strong>Notes:</strong> {alert.notes}
           </div>
         </div>
-      </div>
-      
-      <div className="flex items-center justify-between">
-        <button
-          onClick={() => onOrderClick(alert.orderId)}
-          className="flex items-center text-sm text-blue-600 hover:text-blue-800 font-medium transition-colors"
-        >
-          {alert.orderId}
-          <ExternalLink className="w-3 h-3 ml-1" />
-        </button>
-        <span className={`text-sm font-semibold ${
-          alert.amountOwed === 'Pending' 
-            ? 'text-orange-600 bg-orange-100 px-2 py-1 rounded-full' 
-            : 'text-green-700'
-        }`}>
-          {alert.amountOwed}
-        </span>
-      </div>
-
-      {alert.notes && (
-        <div className="mt-3 p-2 bg-blue-50 border border-blue-200 rounded text-xs text-blue-800">
-          <strong>Notes:</strong> {alert.notes}
-        </div>
       )}
-
     </div>
   );
 
