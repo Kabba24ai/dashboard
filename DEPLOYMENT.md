@@ -1,6 +1,6 @@
 # Deployment Guide
 
-Complete deployment instructions for the TaskMaster Pro Dashboard across different platforms and environments.
+Complete deployment instructions for the TaskMaster Pro Dashboard v2.0 with Reports Section across different platforms and environments.
 
 ## 🚀 Quick Deployment
 
@@ -29,7 +29,8 @@ ls -la dist/
 1. Run `npm run build` locally
 2. Go to [Netlify](https://app.netlify.com)
 3. Drag the `dist` folder to the deployment area
-4. Site will be live immediately
+4. Configure redirects for React Router (see SPA Configuration below)
+5. Site will be live immediately
 
 #### Option B: Git Integration
 1. Connect your GitHub repository to Netlify
@@ -37,7 +38,14 @@ ls -la dist/
    - **Build command**: `npm run build`
    - **Publish directory**: `dist`
    - **Node version**: 18
-3. Deploy automatically on git push
+3. Add `_redirects` file for SPA routing (see SPA Configuration)
+4. Deploy automatically on git push
+
+#### SPA Configuration for Netlify
+Create `public/_redirects` file:
+```
+/*    /index.html   200
+```
 
 #### Environment Variables (Netlify)
 ```env
@@ -50,7 +58,8 @@ VITE_ANALYTICS_KEY=your-key-here
 #### Automatic Deployment
 1. Connect GitHub repository to [Vercel](https://vercel.com)
 2. Vercel auto-detects Vite configuration
-3. Deploys automatically on git push
+3. SPA routing is handled automatically
+4. Deploys automatically on git push
 
 #### Manual Configuration
 ```json
@@ -58,7 +67,10 @@ VITE_ANALYTICS_KEY=your-key-here
 {
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
-  "framework": "vite"
+  "framework": "vite",
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
 }
 ```
 
@@ -80,6 +92,7 @@ aws s3api put-bucket-policy --bucket your-bucket-name --policy file://bucket-pol
 - **Origin**: Your S3 bucket
 - **Default Root Object**: `index.html`
 - **Error Pages**: Redirect 404 to `index.html` (for SPA routing)
+- **Custom Error Response**: 404 -> 200 -> `/index.html`
 
 ### 4. Docker Deployment
 
@@ -96,9 +109,42 @@ RUN npm run build
 # Production stage
 FROM nginx:alpine
 COPY --from=build /app/dist /usr/share/nginx/html
+
+# Configure nginx for SPA routing
 COPY nginx.conf /etc/nginx/nginx.conf
+
 EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]
+```
+
+#### nginx.conf for SPA Routing
+```nginx
+events {
+    worker_connections 1024;
+}
+
+http {
+    include       /etc/nginx/mime.types;
+    default_type  application/octet-stream;
+
+    server {
+        listen 80;
+        server_name localhost;
+        root /usr/share/nginx/html;
+        index index.html;
+
+        # Handle SPA routing
+        location / {
+            try_files $uri $uri/ /index.html;
+        }
+
+        # Cache static assets
+        location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg)$ {
+            expires 1y;
+            add_header Cache-Control "public, immutable";
+        }
+    }
+}
 ```
 
 #### Docker Commands
@@ -140,6 +186,43 @@ VITE_ENVIRONMENT=staging
 VITE_DEBUG_MODE=true
 ```
 
+## 🧭 SPA Routing Configuration
+
+### Important for v2.0.0
+Since v2.0.0 includes React Router with multiple pages (`/`, `/reports`, `/reports/sales`), proper SPA routing configuration is **CRITICAL** for deployment.
+
+### Platform-Specific SPA Setup
+
+#### Netlify
+```
+# public/_redirects
+/*    /index.html   200
+```
+
+#### Vercel
+```json
+{
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}
+```
+
+#### Apache (.htaccess)
+```apache
+Options -MultiViews
+RewriteEngine On
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^ index.html [QSA,L]
+```
+
+#### Nginx
+```nginx
+location / {
+    try_files $uri $uri/ /index.html;
+}
+```
+
 ## 🔒 Security Considerations
 
 ### Content Security Policy
@@ -173,6 +256,7 @@ export default defineConfig({
       output: {
         manualChunks: {
           vendor: ['react', 'react-dom'],
+          router: ['react-router-dom'],
           charts: ['recharts'],
           icons: ['lucide-react']
         }
@@ -210,7 +294,7 @@ getTTFB(console.log);
 ### GitHub Actions
 ```yaml
 # .github/workflows/deploy.yml
-name: Deploy Dashboard
+name: Deploy Dashboard v2.0
 
 on:
   push:
@@ -269,6 +353,7 @@ deploy:
   stage: deploy
   script:
     - aws s3 sync dist/ s3://$S3_BUCKET --delete
+    - aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_ID --paths "/*"
   only:
     - main
 ```
@@ -276,10 +361,12 @@ deploy:
 ## 🧪 Testing Before Deployment
 
 ### Pre-deployment Checklist
-- [ ] All components render correctly
-- [ ] Charts display data properly
+- [ ] All pages render correctly (Dashboard, Reports, Sales Report)
+- [ ] Navigation works between all pages
+- [ ] Charts display data properly on all pages
 - [ ] Responsive design works on all devices
 - [ ] All interactive elements function
+- [ ] SPA routing works correctly
 - [ ] Performance metrics are acceptable
 - [ ] Security headers are configured
 - [ ] Environment variables are set
@@ -293,6 +380,12 @@ npm test
 npm run build
 npm run preview
 
+# Test routing manually
+# Navigate to: http://localhost:4173/
+# Navigate to: http://localhost:4173/reports
+# Navigate to: http://localhost:4173/reports/sales
+# Refresh each page to test SPA routing
+
 # Check bundle size
 npm run build -- --analyze
 
@@ -303,6 +396,11 @@ npx lighthouse http://localhost:4173 --view
 ## 🚨 Troubleshooting
 
 ### Common Issues
+
+#### SPA Routing Issues (v2.0.0 Specific)
+- **Problem**: 404 errors when refreshing `/reports` or `/reports/sales`
+- **Solution**: Configure server redirects (see SPA Configuration above)
+- **Check**: Ensure `_redirects` or server config is properly set
 
 #### Build Failures
 ```bash
@@ -319,12 +417,25 @@ node --version  # Should be 18+
 - **Verify build output** exists in `dist/` folder
 - **Confirm API endpoints** are accessible
 - **Check browser console** for errors
+- **Test SPA routing** configuration
 
 #### Performance Issues
 - **Enable gzip compression** on server
 - **Optimize images** and assets
 - **Use CDN** for static resources
 - **Monitor bundle size** with webpack-bundle-analyzer
+
+### v2.0.0 Specific Troubleshooting
+
+#### Navigation Issues
+- **Check React Router** configuration in App.tsx
+- **Verify Layout component** is wrapping all routes
+- **Test mobile menu** functionality
+
+#### Reports Section Issues
+- **Verify all report pages** are accessible
+- **Check data loading** in SalesReport component
+- **Test back navigation** from reports to main sections
 
 ### Support Resources
 - **GitHub Issues**: For bug reports
@@ -334,4 +445,4 @@ node --version  # Should be 18+
 
 ---
 
-**Ready for Production Deployment! 🚀**
+**Ready for Production Deployment v2.0! 🚀**

@@ -7,8 +7,14 @@ A comprehensive, production-ready dashboard for rental and sales management syst
 ### 📊 **Interactive Analytics Dashboard**
 - **Task Management Badges** - Real-time tracking of deliveries, returns, maintenance, and operational tasks
 - **Sales Trend Analysis** - Advanced line chart with period comparisons and growth metrics
+- **Maintenance Hold Tracking** - 2-week trend analysis with due vs completed comparison
+- **Damaged Items Tracking** - 2-week trend analysis for quality monitoring
+
+### 📋 **Comprehensive Reports Section**
+- **Sales Report** - Complete sales analysis with trends, categories, and product performance
 - **Category Performance** - Top 10 categories with market share analysis
 - **Product Analytics** - Top 10 products with performance gap insights
+- **Additional Reports** - Inventory, Customer, Operations, Financial, and Rental reports (coming soon)
 
 ### 🎨 **Professional UI/UX**
 - **Apple-level Design Aesthetics** - Clean, sophisticated visual presentation
@@ -28,6 +34,7 @@ A comprehensive, production-ready dashboard for rental and sales management syst
 - **Styling**: Tailwind CSS
 - **Charts**: Recharts for data visualization
 - **Icons**: Lucide React
+- **Routing**: React Router DOM
 - **Build Tool**: Vite
 - **Development**: Hot Module Replacement (HMR)
 
@@ -35,9 +42,13 @@ A comprehensive, production-ready dashboard for rental and sales management syst
 
 ```
 src/
-├── App.tsx                    # Main dashboard component
-├── Dashboard-2.tsx            # Basic version (reference)
-├── Dashboard-3.tsx            # Enhanced version (milestone)
+├── components/
+│   └── Layout.tsx             # Navigation layout with sidebar
+├── pages/
+│   ├── Dashboard.tsx          # Main operational dashboard
+│   ├── Reports.tsx            # Reports overview page
+│   └── SalesReport.tsx        # Detailed sales analysis
+├── App.tsx                    # Main app with routing
 ├── main.tsx                   # Application entry point
 ├── index.css                  # Global styles and Tailwind imports
 └── vite-env.d.ts             # Vite type definitions
@@ -84,15 +95,30 @@ src/
 - **Period Options**: Rolling 30 days, Current/Last Month, Current/Last Year, Year Comparison
 - **Enhanced Tooltips**: Detailed breakdowns with trend indicators
 
-### 3. Category Performance Analysis
-- **Metrics Cards**: Total Sales, Average per Category, Top Category, Market Share
-- **Bar Chart**: Top 10 categories with gradient styling
-- **Tooltips**: Sales amounts, market share percentages, vs average comparisons
+### 3. Maintenance Hold Tracking (NEW)
+- **2-Week Trend Analysis**: Daily due vs completed tracking
+- **Visual Indicators**: Orange theme matching maintenance operations
+- **Interactive Tooltips**: Daily breakdown with completion rates
 
-### 4. Product Performance Analysis
-- **Metrics Cards**: Total Sales, Average per Product, Top Product, Performance Gap
-- **Bar Chart**: Top 10 products with professional styling
-- **Tooltips**: Sales data, market share, ranking, performance vs average
+### 4. Damaged Items Tracking (NEW)
+- **2-Week Trend Analysis**: Daily due vs completed tracking
+- **Visual Indicators**: Red theme matching alert status
+- **Interactive Tooltips**: Quality monitoring insights
+
+## 📋 Reports Section
+
+### 1. Sales Report (Active)
+- **Sales Trend Analysis**: Comprehensive line chart with multiple period options
+- **Top 10 Categories**: Bar chart with market share analysis and metrics
+- **Top 10 Products**: Bar chart with performance gap analysis and rankings
+- **Enhanced Features**: All charts include rich tooltips, metrics cards, and export options
+
+### 2. Additional Reports (Coming Soon)
+- **Inventory Report**: Stock levels, movements, and availability tracking
+- **Customer Report**: Analytics, rental history, and satisfaction metrics
+- **Operations Report**: Efficiency, maintenance, and task completion analysis
+- **Financial Report**: Revenue analysis, profit margins, and performance
+- **Rental Report**: Patterns, duration analysis, and booking trends
 
 ## 🎨 Design System
 
@@ -111,6 +137,18 @@ src/
 - **8px Grid System**: Consistent spacing throughout the interface
 - **Component Padding**: 24px (p-6) for cards, 20px (p-5) for badges
 - **Gap Spacing**: 24px (gap-6) for main sections, 16px (gap-4) for metrics
+
+## 🧭 Navigation
+
+### Desktop Navigation
+- **Sidebar Layout**: Fixed sidebar with TaskMaster Pro branding
+- **Menu Items**: Dashboard, Reports with active state indicators
+- **Professional Styling**: Clean, modern design with hover effects
+
+### Mobile Navigation
+- **Responsive Header**: Collapsible menu with hamburger toggle
+- **Touch-Friendly**: Optimized for mobile interactions
+- **Consistent Experience**: Same functionality across all devices
 
 ## 🔧 Customization
 
@@ -133,8 +171,8 @@ const handleTaskClick = (taskType: string) => {
 Replace placeholder data with your actual data sources:
 - `taskData` - Real-time task status from your API
 - `salesData` - Sales metrics from your analytics system
-- `categoryData` - Category performance data
-- `productData` - Product sales information
+- `maintenanceData` - 2-week maintenance tracking data
+- `damagedData` - 2-week damaged items tracking data
 
 ## 📱 Responsive Breakpoints
 
@@ -162,6 +200,20 @@ Replace placeholder data with your actual data sources:
 - **TypeScript**: Full type safety
 - **ESLint**: Code linting and formatting
 - **Prettier**: Code formatting (recommended)
+
+## 🎯 Key Features Summary
+
+### Dashboard (Operational Focus)
+- ✅ **Task Management**: Schedule and Operations blocks with interactive badges
+- ✅ **Sales Trend**: Professional line chart with comprehensive metrics
+- ✅ **Maintenance Tracking**: 2-week trend analysis (NEW)
+- ✅ **Damaged Items**: 2-week quality monitoring (NEW)
+
+### Reports (Analytical Focus)
+- ✅ **Sales Report**: Complete sales analysis with 3 detailed charts
+- 🔄 **Additional Reports**: 5 more reports coming soon
+- ✅ **Professional Navigation**: Dedicated reports section
+- ✅ **Export Ready**: Download and refresh functionality
 
 ## 📄 License
 

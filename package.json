@@ -1,12 +1,14 @@
 {
-  "name": "taskmaster-pro-dashboard",
+  "name": "taskmaster-pro-dashboard-v2",
   "private": true,
-  "version": "1.0.0",
+  "version": "2.0.0",
   "type": "module",
-  "description": "Advanced project management dashboard built with React and Tailwind CSS",
+  "description": "Advanced project management dashboard with Reports section built with React and Tailwind CSS",
   "keywords": [
     "react",
     "dashboard",
+    "reports",
+    "navigation",
     "tailwind",
     "charts",
     "analytics",

@@ -1,6 +1,6 @@
 # Integration Guide
 
-Complete guide for integrating the TaskMaster Pro Dashboard with your existing systems, APIs, and backend services.
+Complete guide for integrating the TaskMaster Pro Dashboard v2.0 with Reports Section with your existing systems, APIs, and backend services.
 
 ## 🔌 API Integration
 
@@ -93,7 +93,75 @@ export const useSalesData = (period: string) => {
 };
 ```
 
-### 3. Category & Product Data Integration
+### 3. Maintenance & Damaged Items Data Integration (NEW in v2.0)
+
+```typescript
+// hooks/useMaintenanceData.ts
+interface MaintenanceDataPoint {
+  date: string;
+  due: number;
+  completed: number;
+}
+
+export const useMaintenanceData = () => {
+  const [maintenanceData, setMaintenanceData] = useState<MaintenanceDataPoint[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchMaintenanceData = async () => {
+      try {
+        const response = await fetch(
+          `${import.meta.env.VITE_API_BASE_URL}/api/maintenance/trend?days=14`
+        );
+        const data = await response.json();
+        setMaintenanceData(data);
+      } catch (error) {
+        console.error('Failed to fetch maintenance data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchMaintenanceData();
+  }, []);
+
+  return { maintenanceData, loading };
+};
+
+// hooks/useDamagedItemsData.ts
+interface DamagedItemsDataPoint {
+  date: string;
+  due: number;
+  completed: number;
+}
+
+export const useDamagedItemsData = () => {
+  const [damagedData, setDamagedData] = useState<DamagedItemsDataPoint[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchDamagedData = async () => {
+      try {
+        const response = await fetch(
+          `${import.meta.env.VITE_API_BASE_URL}/api/damaged-items/trend?days=14`
+        );
+        const data = await response.json();
+        setDamagedData(data);
+      } catch (error) {
+        console.error('Failed to fetch damaged items data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDamagedData();
+  }, []);
+
+  return { damagedData, loading };
+};
+```
+
+### 4. Category & Product Data Integration
 
 ```typescript
 // hooks/useCategoryData.ts
@@ -118,6 +186,30 @@ export const useCategoryData = (period: string) => {
   }, [period]);
 
   return { categoryData };
+};
+
+// hooks/useProductData.ts
+interface ProductData {
+  name: string;
+  sales: number;
+}
+
+export const useProductData = (period: string) => {
+  const [productData, setProductData] = useState<ProductData[]>([]);
+  
+  useEffect(() => {
+    const fetchProductData = async () => {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_BASE_URL}/api/products/top?period=${period}&limit=10`
+      );
+      const data = await response.json();
+      setProductData(data);
+    };
+
+    fetchProductData();
+  }, [period]);
+
+  return { productData };
 };
 ```
 
@@ -161,10 +253,22 @@ export const useWebSocket = (url: string, onMessage: (data: any) => void) => {
 // Usage in Dashboard
 const Dashboard = () => {
   const [taskData, setTaskData] = useState(initialTaskData);
+  const [maintenanceData, setMaintenanceData] = useState(initialMaintenanceData);
+  const [damagedData, setDamagedData] = useState(initialDamagedData);
 
   useWebSocket(
     `${import.meta.env.VITE_WS_URL}/tasks`,
     (data) => setTaskData(data)
+  );
+
+  useWebSocket(
+    `${import.meta.env.VITE_WS_URL}/maintenance`,
+    (data) => setMaintenanceData(data)
+  );
+
+  useWebSocket(
+    `${import.meta.env.VITE_WS_URL}/damaged-items`,
+    (data) => setDamagedData(data)
   );
 
   // ... rest of component
@@ -193,30 +297,36 @@ export const useSSE = (url: string, onMessage: (data: any) => void) => {
 };
 ```
 
-## 🧭 Navigation Integration
+## 🧭 Navigation Integration (NEW in v2.0)
 
 ### React Router Integration
 
-```typescript
-// Install React Router
-npm install react-router-dom @types/react-router-dom
+The v2.0 dashboard now includes React Router for navigation between Dashboard and Reports sections.
 
-// App.tsx with routing
+```typescript
+// App.tsx structure
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import Dashboard from './Dashboard';
-import DeliveriesPage from './pages/DeliveriesPage';
-import MaintenancePage from './pages/MaintenancePage';
+import Layout from './components/Layout';
+import Dashboard from './pages/Dashboard';
+import Reports from './pages/Reports';
+import SalesReport from './pages/SalesReport';
 
 const App = () => {
   return (
     <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Dashboard />} />
-        <Route path="/deliveries" element={<DeliveriesPage />} />
-        <Route path="/maintenance" element={<MaintenancePage />} />
-        <Route path="/returns" element={<ReturnsPage />} />
-        <Route path="/damaged" element={<DamagedItemsPage />} />
-      </Routes>
+      <Layout>
+        <Routes>
+          <Route path="/" element={<Dashboard />} />
+          <Route path="/reports" element={<Reports />} />
+          <Route path="/reports/sales" element={<SalesReport />} />
+          {/* Add more report routes as needed */}
+          <Route path="/reports/inventory" element={<InventoryReport />} />
+          <Route path="/reports/customers" element={<CustomerReport />} />
+          <Route path="/reports/operations" element={<OperationsReport />} />
+          <Route path="/reports/financial" element={<FinancialReport />} />
+          <Route path="/reports/rentals" element={<RentalReport />} />
+        </Routes>
+      </Layout>
     </BrowserRouter>
   );
 };
@@ -263,6 +373,51 @@ export const useTaskNavigation = () => {
   };
 
   return { handleTaskClick };
+};
+
+// Report navigation
+export const useReportNavigation = () => {
+  const navigate = useNavigate();
+
+  const navigateToReport = (reportType: string) => {
+    navigate(`/reports/${reportType}`);
+  };
+
+  const navigateToReports = () => {
+    navigate('/reports');
+  };
+
+  const navigateToDashboard = () => {
+    navigate('/');
+  };
+
+  return { navigateToReport, navigateToReports, navigateToDashboard };
+};
+```
+
+### Layout Component Integration
+
+```typescript
+// components/Layout.tsx integration points
+const Layout: React.FC<LayoutProps> = ({ children }) => {
+  const location = useLocation();
+
+  // Add custom navigation logic
+  const handleMenuClick = (path: string) => {
+    // Add analytics tracking
+    trackNavigation(path);
+    
+    // Add custom logic before navigation
+    if (path === '/reports' && hasUnsavedChanges()) {
+      showConfirmDialog();
+      return;
+    }
+    
+    // Navigate normally
+    navigate(path);
+  };
+
+  // ... rest of component
 };
 ```
 
@@ -314,11 +469,11 @@ apiClient.interceptors.request.use((config) => {
 });
 ```
 
-### Protected Routes
+### Protected Routes (v2.0 Compatible)
 
 ```typescript
 // components/ProtectedRoute.tsx
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import { AuthService } from '../utils/auth';
 
 interface ProtectedRouteProps {
@@ -326,17 +481,41 @@ interface ProtectedRouteProps {
 }
 
 export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
+  const location = useLocation();
+
   if (!AuthService.isAuthenticated()) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
   return <>{children}</>;
+};
+
+// Usage in App.tsx
+const App = () => {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/*" element={
+          <ProtectedRoute>
+            <Layout>
+              <Routes>
+                <Route path="/" element={<Dashboard />} />
+                <Route path="/reports" element={<Reports />} />
+                <Route path="/reports/sales" element={<SalesReport />} />
+              </Routes>
+            </Layout>
+          </ProtectedRoute>
+        } />
+      </Routes>
+    </BrowserRouter>
+  );
 };
 ```
 
 ## 📊 Analytics Integration
 
-### Google Analytics 4
+### Google Analytics 4 (v2.0 Compatible)
 
 ```typescript
 // utils/analytics.ts
@@ -348,11 +527,31 @@ export const trackEvent = (eventName: string, parameters?: any) => {
   }
 };
 
+export const trackPageView = (path: string) => {
+  if (import.meta.env.PROD) {
+    gtag('config', 'GA_MEASUREMENT_ID', {
+      page_path: path
+    });
+  }
+};
+
+// Usage in Layout component
+const Layout = ({ children }) => {
+  const location = useLocation();
+
+  useEffect(() => {
+    trackPageView(location.pathname);
+  }, [location]);
+
+  // ... rest of component
+};
+
 // Usage in components
 const TaskBadge = ({ taskType, ...props }) => {
   const handleClick = () => {
     trackEvent('task_badge_click', {
       task_type: taskType,
+      page: 'dashboard',
       timestamp: new Date().toISOString()
     });
     
@@ -365,6 +564,24 @@ const TaskBadge = ({ taskType, ...props }) => {
     </div>
   );
 };
+
+const ReportCard = ({ reportType, ...props }) => {
+  const handleClick = () => {
+    trackEvent('report_access', {
+      report_type: reportType,
+      page: 'reports',
+      timestamp: new Date().toISOString()
+    });
+    
+    navigateToReport(reportType);
+  };
+
+  return (
+    <div onClick={handleClick}>
+      {/* Report card content */}
+    </div>
+  );
+};
 ```
 
 ### Custom Analytics
@@ -372,19 +589,20 @@ const TaskBadge = ({ taskType, ...props }) => {
 ```typescript
 // utils/customAnalytics.ts
 export class AnalyticsService {
-  static async trackDashboardView() {
+  static async trackPageView(page: string, additionalData?: any) {
     await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/analytics/page-view`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        page: 'dashboard',
+        page,
         timestamp: new Date().toISOString(),
-        user_agent: navigator.userAgent
+        user_agent: navigator.userAgent,
+        ...additionalData
       })
     });
   }
 
-  static async trackChartInteraction(chartType: string, action: string) {
+  static async trackChartInteraction(chartType: string, action: string, page: string) {
     await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/analytics/interaction`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -392,6 +610,20 @@ export class AnalyticsService {
         type: 'chart_interaction',
         chart_type: chartType,
         action,
+        page,
+        timestamp: new Date().toISOString()
+      })
+    });
+  }
+
+  static async trackNavigation(from: string, to: string) {
+    await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/analytics/navigation`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        type: 'navigation',
+        from,
+        to,
         timestamp: new Date().toISOString()
       })
     });
@@ -401,7 +633,7 @@ export class AnalyticsService {
 
 ## 🔄 State Management
 
-### Redux Toolkit Integration
+### Redux Toolkit Integration (v2.0 Compatible)
 
 ```typescript
 // Install Redux Toolkit
@@ -418,17 +650,30 @@ export const fetchTaskData = createAsyncThunk(
   }
 );
 
+export const fetchMaintenanceData = createAsyncThunk(
+  'dashboard/fetchMaintenanceData',
+  async () => {
+    const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/maintenance/trend?days=14`);
+    return response.json();
+  }
+);
+
 const dashboardSlice = createSlice({
   name: 'dashboard',
   initialState: {
     taskData: null,
     salesData: {},
+    maintenanceData: [],
+    damagedData: [],
     loading: false,
     error: null
   },
   reducers: {
     updateTaskData: (state, action) => {
       state.taskData = action.payload;
+    },
+    updateMaintenanceData: (state, action) => {
+      state.maintenanceData = action.payload;
     }
   },
   extraReducers: (builder) => {
@@ -448,6 +693,29 @@ const dashboardSlice = createSlice({
 });
 
 export default dashboardSlice.reducer;
+
+// store/reportsSlice.ts
+const reportsSlice = createSlice({
+  name: 'reports',
+  initialState: {
+    salesData: {},
+    categoryData: [],
+    productData: [],
+    currentPeriod: 'rolling30',
+    loading: false,
+    error: null
+  },
+  reducers: {
+    setPeriod: (state, action) => {
+      state.currentPeriod = action.payload;
+    },
+    updateSalesData: (state, action) => {
+      state.salesData = action.payload;
+    }
+  }
+});
+
+export default reportsSlice.reducer;
 ```
 
 ### Zustand (Lightweight Alternative)
@@ -462,14 +730,19 @@ import { create } from 'zustand';
 interface DashboardState {
   taskData: any;
   salesData: any;
+  maintenanceData: any[];
+  damagedData: any[];
   loading: boolean;
   fetchTaskData: () => Promise<void>;
+  fetchMaintenanceData: () => Promise<void>;
   updateTaskData: (data: any) => void;
 }
 
 export const useDashboardStore = create<DashboardState>((set, get) => ({
   taskData: null,
   salesData: {},
+  maintenanceData: [],
+  damagedData: [],
   loading: false,
   
   fetchTaskData: async () => {
@@ -483,8 +756,47 @@ export const useDashboardStore = create<DashboardState>((set, get) => ({
       console.error('Failed to fetch task data:', error);
     }
   },
+
+  fetchMaintenanceData: async () => {
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/maintenance/trend?days=14`);
+      const data = await response.json();
+      set({ maintenanceData: data });
+    } catch (error) {
+      console.error('Failed to fetch maintenance data:', error);
+    }
+  },
   
   updateTaskData: (data) => set({ taskData: data })
+}));
+
+// store/reportsStore.ts
+interface ReportsState {
+  salesData: any;
+  categoryData: any[];
+  productData: any[];
+  currentPeriod: string;
+  setPeriod: (period: string) => void;
+  fetchSalesData: (period: string) => Promise<void>;
+}
+
+export const useReportsStore = create<ReportsState>((set, get) => ({
+  salesData: {},
+  categoryData: [],
+  productData: [],
+  currentPeriod: 'rolling30',
+  
+  setPeriod: (period) => set({ currentPeriod: period }),
+  
+  fetchSalesData: async (period) => {
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/sales/trend?period=${period}`);
+      const data = await response.json();
+      set({ salesData: { ...get().salesData, [period]: data } });
+    } catch (error) {
+      console.error('Failed to fetch sales data:', error);
+    }
+  }
 }));
 ```
 
@@ -500,6 +812,12 @@ interface Config {
   analyticsKey: string;
   refreshInterval: number;
   environment: 'development' | 'staging' | 'production';
+  features: {
+    realTimeUpdates: boolean;
+    advancedAnalytics: boolean;
+    exportFeatures: boolean;
+    darkMode: boolean;
+  };
 }
 
 const config: Config = {
@@ -507,7 +825,13 @@ const config: Config = {
   wsUrl: import.meta.env.VITE_WS_URL || 'ws://localhost:3001',
   analyticsKey: import.meta.env.VITE_ANALYTICS_KEY || '',
   refreshInterval: parseInt(import.meta.env.VITE_REFRESH_INTERVAL || '30000'),
-  environment: (import.meta.env.VITE_ENVIRONMENT as Config['environment']) || 'development'
+  environment: (import.meta.env.VITE_ENVIRONMENT as Config['environment']) || 'development',
+  features: {
+    realTimeUpdates: import.meta.env.VITE_ENABLE_REAL_TIME === 'true',
+    advancedAnalytics: import.meta.env.VITE_ENABLE_ANALYTICS === 'true',
+    exportFeatures: import.meta.env.VITE_ENABLE_EXPORT === 'true',
+    darkMode: import.meta.env.VITE_ENABLE_DARK_MODE === 'true'
+  }
 };
 
 export default config;
@@ -521,7 +845,10 @@ export const featureFlags = {
   realTimeUpdates: import.meta.env.VITE_ENABLE_REAL_TIME === 'true',
   advancedAnalytics: import.meta.env.VITE_ENABLE_ANALYTICS === 'true',
   exportFeatures: import.meta.env.VITE_ENABLE_EXPORT === 'true',
-  darkMode: import.meta.env.VITE_ENABLE_DARK_MODE === 'true'
+  darkMode: import.meta.env.VITE_ENABLE_DARK_MODE === 'true',
+  maintenanceTracking: import.meta.env.VITE_ENABLE_MAINTENANCE_TRACKING === 'true',
+  damagedItemsTracking: import.meta.env.VITE_ENABLE_DAMAGED_TRACKING === 'true',
+  reportsSection: import.meta.env.VITE_ENABLE_REPORTS === 'true'
 };
 
 // Usage in components
@@ -530,8 +857,21 @@ const Dashboard = () => {
     <div>
       {featureFlags.realTimeUpdates && <RealTimeIndicator />}
       {featureFlags.exportFeatures && <ExportButton />}
+      {featureFlags.maintenanceTracking && <MaintenanceChart />}
+      {featureFlags.damagedItemsTracking && <DamagedItemsChart />}
       {/* ... rest of component */}
     </div>
+  );
+};
+
+const Layout = () => {
+  const navigation = [
+    { name: 'Dashboard', href: '/', icon: Home },
+    ...(featureFlags.reportsSection ? [{ name: 'Reports', href: '/reports', icon: FileText }] : [])
+  ];
+
+  return (
+    // ... layout with conditional navigation
   );
 };
 ```
@@ -548,6 +888,12 @@ export const mockTaskData = {
   // ... rest of mock data
 };
 
+export const mockMaintenanceData = [
+  { date: 'Mon 1/13', due: 5, completed: 3 },
+  { date: 'Tue 1/14', due: 3, completed: 4 },
+  // ... rest of mock data
+];
+
 export const mockApiResponse = (data: any, delay = 100) => {
   return new Promise((resolve) => {
     setTimeout(() => resolve({ json: () => Promise.resolve(data) }), delay);
@@ -556,14 +902,21 @@ export const mockApiResponse = (data: any, delay = 100) => {
 
 // tests/Dashboard.test.tsx
 import { render, screen } from '@testing-library/react';
-import { Dashboard } from '../Dashboard';
-import { mockTaskData, mockApiResponse } from '../__mocks__/api';
+import { BrowserRouter } from 'react-router-dom';
+import { Dashboard } from '../pages/Dashboard';
+import { mockTaskData, mockMaintenanceData, mockApiResponse } from '../__mocks__/api';
 
 // Mock fetch
 global.fetch = jest.fn(() => mockApiResponse(mockTaskData));
 
+const DashboardWithRouter = () => (
+  <BrowserRouter>
+    <Dashboard />
+  </BrowserRouter>
+);
+
 test('renders dashboard with task data', async () => {
-  render(<Dashboard />);
+  render(<DashboardWithRouter />);
   
   // Wait for data to load
   await screen.findByText('Dashboard Overview');
@@ -571,6 +924,31 @@ test('renders dashboard with task data', async () => {
   // Verify task badges are rendered
   expect(screen.getByText('Deliveries - Truck')).toBeInTheDocument();
   expect(screen.getByText('15')).toBeInTheDocument(); // Completed count
+});
+
+test('renders maintenance tracking chart', async () => {
+  render(<DashboardWithRouter />);
+  
+  // Wait for maintenance chart to load
+  await screen.findByText('Maintenance Hold - 2 Week Trend');
+  
+  // Verify chart is rendered
+  expect(screen.getByRole('img', { name: /chart/i })).toBeInTheDocument();
+});
+
+// tests/Reports.test.tsx
+import { Reports } from '../pages/Reports';
+
+test('renders reports overview', () => {
+  render(
+    <BrowserRouter>
+      <Reports />
+    </BrowserRouter>
+  );
+  
+  expect(screen.getByText('Reports')).toBeInTheDocument();
+  expect(screen.getByText('Sales Report')).toBeInTheDocument();
+  expect(screen.getByText('Coming Soon')).toBeInTheDocument();
 });
 ```
 
@@ -590,6 +968,15 @@ export const NativeBridge = {
     }
   },
 
+  navigateToReport: (reportType: string) => {
+    if (window.ReactNativeWebView) {
+      window.ReactNativeWebView.postMessage(JSON.stringify({
+        type: 'NAVIGATE_TO_REPORT',
+        payload: { reportType }
+      }));
+    }
+  },
+
   showNotification: (message: string) => {
     if (window.ReactNativeWebView) {
       window.ReactNativeWebView.postMessage(JSON.stringify({
@@ -597,10 +984,91 @@ export const NativeBridge = {
         payload: { message }
       }));
     }
+  },
+
+  shareReport: (reportData: any) => {
+    if (window.ReactNativeWebView) {
+      window.ReactNativeWebView.postMessage(JSON.stringify({
+        type: 'SHARE_REPORT',
+        payload: { reportData }
+      }));
+    }
   }
+};
+```
+
+## 🔄 Data Export Integration
+
+### Export Functionality
+
+```typescript
+// utils/exportUtils.ts
+export const exportToCSV = (data: any[], filename: string) => {
+  const csvContent = convertToCSV(data);
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement('a');
+  
+  if (link.download !== undefined) {
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', filename);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+};
+
+export const exportToPDF = async (elementId: string, filename: string) => {
+  const element = document.getElementById(elementId);
+  if (!element) return;
+
+  const canvas = await html2canvas(element);
+  const imgData = canvas.toDataURL('image/png');
+  
+  const pdf = new jsPDF();
+  const imgWidth = 210;
+  const pageHeight = 295;
+  const imgHeight = (canvas.height * imgWidth) / canvas.width;
+  let heightLeft = imgHeight;
+
+  let position = 0;
+
+  pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+  heightLeft -= pageHeight;
+
+  while (heightLeft >= 0) {
+    position = heightLeft - imgHeight;
+    pdf.addPage();
+    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+    heightLeft -= pageHeight;
+  }
+
+  pdf.save(filename);
+};
+
+// Usage in components
+const SalesReport = () => {
+  const handleExportCSV = () => {
+    exportToCSV(salesData, 'sales-report.csv');
+  };
+
+  const handleExportPDF = () => {
+    exportToPDF('sales-report-container', 'sales-report.pdf');
+  };
+
+  return (
+    <div id="sales-report-container">
+      <div className="flex space-x-2">
+        <button onClick={handleExportCSV}>Export CSV</button>
+        <button onClick={handleExportPDF}>Export PDF</button>
+      </div>
+      {/* Report content */}
+    </div>
+  );
 };
 ```
 
 ---
 
-**Ready for Seamless Integration! 🔌**
+**Ready for Seamless Integration v2.0! 🔌**
