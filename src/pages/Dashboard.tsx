@@ -1,26 +1,34 @@
 import React, { useState } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { Trophy, Truck, Store, Wrench, AlertTriangle, Clock, CheckCircle, TrendingUp, TrendingDown, RefreshCw, Download, Fuel, DollarSign, X, ExternalLink } from 'lucide-react';
+import { Trophy, Truck, Store, Wrench, AlertTriangle, Clock, CheckCircle, TrendingUp, TrendingDown, RefreshCw, Download, Fuel, DollarSign, ExternalLink, ChevronDown } from 'lucide-react';
 
 const Dashboard = () => {
   const [salesPeriod, setSalesPeriod] = useState('rolling30');
   const [fuelAlerts, setFuelAlerts] = useState([
-    { id: 1, customerName: 'ABC Events LLC', orderId: 'ORD-2024-001', amountOwed: 'Pending', date: '2024-01-27', type: 'fuel' },
-    { id: 2, customerName: 'Wedding Bliss Co', orderId: 'ORD-2024-002', amountOwed: '$45.00', date: '2024-01-26', type: 'fuel' },
-    { id: 3, customerName: 'Corporate Solutions', orderId: 'ORD-2024-003', amountOwed: 'Pending', date: '2024-01-25', type: 'fuel' },
-    { id: 4, customerName: 'Party Time Rentals', orderId: 'ORD-2024-004', amountOwed: '$32.50', date: '2024-01-24', type: 'fuel' },
-    { id: 5, customerName: 'Elite Celebrations', orderId: 'ORD-2024-005', amountOwed: 'Pending', date: '2024-01-23', type: 'fuel' },
-    { id: 6, customerName: 'Dream Weddings Inc', orderId: 'ORD-2024-006', amountOwed: '$28.75', date: '2024-01-22', type: 'fuel' }
+    { id: 1, customerName: 'ABC Events LLC', orderId: 'ORD-2024-001', amountOwed: 'Pending', date: '2024-01-27', type: 'fuel', notes: '' },
+    { id: 2, customerName: 'Wedding Bliss Co', orderId: 'ORD-2024-002', amountOwed: '$45.00', date: '2024-01-26', type: 'fuel', notes: 'Customer disputed charge initially' },
+    { id: 3, customerName: 'Corporate Solutions', orderId: 'ORD-2024-003', amountOwed: 'Pending', date: '2024-01-25', type: 'fuel', notes: '' },
+    { id: 4, customerName: 'Party Time Rentals', orderId: 'ORD-2024-004', amountOwed: '$32.50', date: '2024-01-24', type: 'fuel', notes: 'Awaiting payment confirmation' },
+    { id: 5, customerName: 'Elite Celebrations', orderId: 'ORD-2024-005', amountOwed: 'Pending', date: '2024-01-23', type: 'fuel', notes: 'Need to calculate mileage' },
+    { id: 6, customerName: 'Dream Weddings Inc', orderId: 'ORD-2024-006', amountOwed: '$28.75', date: '2024-01-22', type: 'fuel', notes: '' }
   ]);
   
   const [damageAlerts, setDamageAlerts] = useState([
-    { id: 1, customerName: 'Luxury Events Co', orderId: 'ORD-2024-007', amountOwed: '$150.00', date: '2024-01-27', type: 'damage' },
-    { id: 2, customerName: 'Premier Parties', orderId: 'ORD-2024-008', amountOwed: 'Pending', date: '2024-01-26', type: 'damage' },
-    { id: 3, customerName: 'Celebration Central', orderId: 'ORD-2024-009', amountOwed: '$89.99', date: '2024-01-25', type: 'damage' },
-    { id: 4, customerName: 'Event Masters LLC', orderId: 'ORD-2024-010', amountOwed: 'Pending', date: '2024-01-24', type: 'damage' },
-    { id: 5, customerName: 'Perfect Day Events', orderId: 'ORD-2024-011', amountOwed: '$225.00', date: '2024-01-23', type: 'damage' },
-    { id: 6, customerName: 'Grand Occasions', orderId: 'ORD-2024-012', amountOwed: 'Pending', date: '2024-01-22', type: 'damage' }
+    { id: 1, customerName: 'Luxury Events Co', orderId: 'ORD-2024-007', amountOwed: '$150.00', date: '2024-01-27', type: 'damage', notes: 'Tablecloth stain - professional cleaning required' },
+    { id: 2, customerName: 'Premier Parties', orderId: 'ORD-2024-008', amountOwed: 'Pending', date: '2024-01-26', type: 'damage', notes: '' },
+    { id: 3, customerName: 'Celebration Central', orderId: 'ORD-2024-009', amountOwed: '$89.99', date: '2024-01-25', type: 'damage', notes: 'Chair leg broken during event' },
+    { id: 4, customerName: 'Event Masters LLC', orderId: 'ORD-2024-010', amountOwed: 'Pending', date: '2024-01-24', type: 'damage', notes: 'Assessing tent damage from wind' },
+    { id: 5, customerName: 'Perfect Day Events', orderId: 'ORD-2024-011', amountOwed: '$225.00', date: '2024-01-23', type: 'damage', notes: 'Multiple items damaged - invoice sent' },
+    { id: 6, customerName: 'Grand Occasions', orderId: 'ORD-2024-012', amountOwed: 'Pending', date: '2024-01-22', type: 'damage', notes: '' }
   ]);
+
+  // Modal states
+  const [showAmountModal, setShowAmountModal] = useState(false);
+  const [showNotesModal, setShowNotesModal] = useState(false);
+  const [showUpdateDropdown, setShowUpdateDropdown] = useState(null);
+  const [editingAlert, setEditingAlert] = useState(null);
+  const [tempAmount, setTempAmount] = useState('');
+  const [tempNotes, setTempNotes] = useState('');
 
   // Placeholder task data
   const taskData = {
@@ -127,47 +135,151 @@ const Dashboard = () => {
     // This will be replaced with actual navigation to order details
   };
 
-  const handleClearAlert = (alertType: 'fuel' | 'damage', alertId: number) => {
+  const handleAmountClick = (alert) => {
+    setEditingAlert(alert);
+    setTempAmount(alert.amountOwed === 'Pending' ? '' : alert.amountOwed.replace('$', ''));
+    setShowAmountModal(true);
+  };
+
+  const handleNotesClick = (alert) => {
+    setEditingAlert(alert);
+    setTempNotes(alert.notes || '');
+    setShowNotesModal(true);
+  };
+
+  const handleUpdateClick = (alertId) => {
+    setShowUpdateDropdown(showUpdateDropdown === alertId ? null : alertId);
+  };
+
+  const handleStatusUpdate = (alertType: 'fuel' | 'damage', alertId: number, status: 'paid' | 'uncollectible') => {
+    console.log(`Mark alert ${alertId} as ${status}`);
+    
     if (alertType === 'fuel') {
       setFuelAlerts(prev => prev.filter(alert => alert.id !== alertId));
     } else {
       setDamageAlerts(prev => prev.filter(alert => alert.id !== alertId));
     }
+    setShowUpdateDropdown(null);
   };
 
-  const AlertItem = ({ alert, onClear, onOrderClick }) => (
-    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors">
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center justify-between mb-1">
-          <h4 className="text-sm font-semibold text-gray-800 truncate">{alert.customerName}</h4>
-          <span className="text-xs text-gray-500 ml-2">{alert.date}</span>
-        </div>
-        <div className="flex items-center justify-between">
-          <button
-            onClick={() => onOrderClick(alert.orderId)}
-            className="flex items-center text-sm text-blue-600 hover:text-blue-800 font-medium transition-colors"
-          >
-            {alert.orderId}
-            <ExternalLink className="w-3 h-3 ml-1" />
-          </button>
-          <div className="flex items-center">
-            <span className={`text-sm font-semibold ${
-              alert.amountOwed === 'Pending' 
-                ? 'text-orange-600 bg-orange-100 px-2 py-1 rounded-full' 
-                : 'text-green-700'
-            }`}>
-              {alert.amountOwed}
-            </span>
-          </div>
+  const saveAmount = () => {
+    if (editingAlert) {
+      const formattedAmount = tempAmount ? `$${parseFloat(tempAmount).toFixed(2)}` : 'Pending';
+      
+      if (editingAlert.type === 'fuel') {
+        setFuelAlerts(prev => prev.map(alert => 
+          alert.id === editingAlert.id 
+            ? { ...alert, amountOwed: formattedAmount }
+            : alert
+        ));
+      } else {
+        setDamageAlerts(prev => prev.map(alert => 
+          alert.id === editingAlert.id 
+            ? { ...alert, amountOwed: formattedAmount }
+            : alert
+        ));
+      }
+    }
+    setShowAmountModal(false);
+    setEditingAlert(null);
+    setTempAmount('');
+  };
+
+  const saveNotes = () => {
+    if (editingAlert) {
+      if (editingAlert.type === 'fuel') {
+        setFuelAlerts(prev => prev.map(alert => 
+          alert.id === editingAlert.id 
+            ? { ...alert, notes: tempNotes }
+            : alert
+        ));
+      } else {
+        setDamageAlerts(prev => prev.map(alert => 
+          alert.id === editingAlert.id 
+            ? { ...alert, notes: tempNotes }
+            : alert
+        ));
+      }
+    }
+    setShowNotesModal(false);
+    setEditingAlert(null);
+    setTempNotes('');
+  };
+
+  const AlertItem = ({ alert, onAmountClick, onNotesClick, onUpdateClick, onOrderClick }) => (
+    <div className="p-4 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors">
+      <div className="flex items-center justify-between mb-2">
+        <h4 className="text-sm font-semibold text-gray-800">{alert.customerName}</h4>
+        <span className="text-xs text-gray-500">{alert.date}</span>
+      </div>
+      
+      <div className="flex items-center justify-between mb-3">
+        <button
+          onClick={() => onOrderClick(alert.orderId)}
+          className="flex items-center text-sm text-blue-600 hover:text-blue-800 font-medium transition-colors"
+        >
+          {alert.orderId}
+          <ExternalLink className="w-3 h-3 ml-1" />
+        </button>
+        <div className="flex items-center">
+          <span className={`text-sm font-semibold ${
+            alert.amountOwed === 'Pending' 
+              ? 'text-orange-600 bg-orange-100 px-2 py-1 rounded-full' 
+              : 'text-green-700'
+          }`}>
+            {alert.amountOwed}
+          </span>
         </div>
       </div>
-      <button
-        onClick={() => onClear(alert.type, alert.id)}
-        className="ml-3 p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-full transition-colors"
-        title="Clear Alert"
-      >
-        <X className="w-4 h-4" />
-      </button>
+
+      {alert.notes && (
+        <div className="mb-3 p-2 bg-blue-50 border border-blue-200 rounded text-xs text-blue-800">
+          <strong>Notes:</strong> {alert.notes}
+        </div>
+      )}
+
+      <div className="flex items-center justify-between space-x-2">
+        <button
+          onClick={() => onAmountClick(alert)}
+          className="flex-1 px-3 py-1.5 bg-blue-600 text-white text-xs font-medium rounded hover:bg-blue-700 transition-colors"
+        >
+          Amount
+        </button>
+        
+        <div className="relative">
+          <button
+            onClick={() => onUpdateClick(alert.id)}
+            className="flex items-center px-3 py-1.5 bg-green-600 text-white text-xs font-medium rounded hover:bg-green-700 transition-colors"
+          >
+            Update
+            <ChevronDown className="w-3 h-3 ml-1" />
+          </button>
+          
+          {showUpdateDropdown === alert.id && (
+            <div className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-10 min-w-[120px]">
+              <button
+                onClick={() => handleStatusUpdate(alert.type, alert.id, 'paid')}
+                className="w-full px-3 py-2 text-left text-xs text-gray-700 hover:bg-gray-100 rounded-t-lg"
+              >
+                Mark as Paid
+              </button>
+              <button
+                onClick={() => handleStatusUpdate(alert.type, alert.id, 'uncollectible')}
+                className="w-full px-3 py-2 text-left text-xs text-gray-700 hover:bg-gray-100 rounded-b-lg"
+              >
+                Mark as Uncollectible
+              </button>
+            </div>
+          )}
+        </div>
+        
+        <button
+          onClick={() => onNotesClick(alert)}
+          className="flex-1 px-3 py-1.5 bg-gray-600 text-white text-xs font-medium rounded hover:bg-gray-700 transition-colors"
+        >
+          Notes
+        </button>
+      </div>
     </div>
   );
 
@@ -200,7 +312,9 @@ const Dashboard = () => {
             <AlertItem
               key={alert.id}
               alert={alert}
-              onClear={handleClearAlert}
+              onAmountClick={handleAmountClick}
+              onNotesClick={handleNotesClick}
+              onUpdateClick={handleUpdateClick}
               onOrderClick={handleOrderClick}
             />
           ))}
@@ -222,6 +336,7 @@ const Dashboard = () => {
       )}
     </div>
   );
+
   const TaskBadge = ({ icon: Icon, label, due, completed, taskType, color = "blue" }) => (
     <div 
       className="bg-white rounded-xl shadow-sm border border-gray-300 p-5 cursor-pointer hover:shadow-lg hover:border-blue-400 transition-all duration-300 group"
@@ -702,6 +817,83 @@ const Dashboard = () => {
             </ResponsiveContainer>
           </div>
         </div>
+
+        {/* Amount Modal */}
+        {showAmountModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg p-6 w-96 max-w-90vw">
+              <h3 className="text-lg font-semibold mb-4">
+                {editingAlert?.amountOwed === 'Pending' ? 'Add Amount' : 'Edit Amount'}
+              </h3>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Amount ($)
+                </label>
+                <input
+                  type="number"
+                  step="0.01"
+                  value={tempAmount}
+                  onChange={(e) => setTempAmount(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="0.00"
+                  autoFocus
+                />
+              </div>
+              <div className="flex justify-end space-x-3">
+                <button
+                  onClick={() => setShowAmountModal(false)}
+                  className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={saveAmount}
+                  className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+                >
+                  Save
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Notes Modal */}
+        {showNotesModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg p-6 w-96 max-w-90vw">
+              <h3 className="text-lg font-semibold mb-4">
+                {editingAlert?.notes ? 'Edit Notes' : 'Add Notes'}
+              </h3>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Notes
+                </label>
+                <textarea
+                  value={tempNotes}
+                  onChange={(e) => setTempNotes(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  rows={4}
+                  placeholder="Add notes about this alert..."
+                  autoFocus
+                />
+              </div>
+              <div className="flex justify-end space-x-3">
+                <button
+                  onClick={() => setShowNotesModal(false)}
+                  className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={saveNotes}
+                  className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+                >
+                  Save
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
