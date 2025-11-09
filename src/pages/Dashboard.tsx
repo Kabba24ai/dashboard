@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { Trophy, Truck, Store, Wrench, AlertTriangle, Clock, CheckCircle, TrendingUp, TrendingDown, RefreshCw, Download, Fuel, DollarSign, ExternalLink, ChevronDown } from 'lucide-react';
+import { Trophy, Truck, Store, Wrench, AlertTriangle, Clock, CheckCircle, TrendingUp, TrendingDown, RefreshCw, Download, Fuel, DollarSign, ExternalLink, ChevronDown, FileText } from 'lucide-react';
 
 const Dashboard = () => {
   const [salesPeriod, setSalesPeriod] = useState('rolling30');
@@ -210,7 +210,53 @@ const Dashboard = () => {
     <div className="p-4 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors">
       <div className="flex items-center justify-between mb-2">
         <h4 className="text-sm font-semibold text-gray-800">{alert.customerName}</h4>
-        <span className="text-xs text-gray-500">{alert.date}</span>
+        <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={() => onAmountClick(alert)}
+              className="p-1.5 text-blue-600 hover:text-blue-800 hover:bg-blue-100 rounded transition-colors"
+              title="Edit Amount"
+            >
+              <DollarSign className="w-4 h-4" />
+            </button>
+            
+            <div className="relative">
+              <button
+                onClick={() => onUpdateClick(alert.id)}
+                className="p-1.5 text-green-600 hover:text-green-800 hover:bg-green-100 rounded transition-colors"
+                title="Update Status"
+              >
+                <ChevronDown className="w-4 h-4" />
+              </button>
+              
+              {showUpdateDropdown === alert.id && (
+                <div className="absolute top-full right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-10 min-w-[140px]">
+                  <button
+                    onClick={() => handleStatusUpdate(alert.type, alert.id, 'paid')}
+                    className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 rounded-t-lg"
+                  >
+                    Mark as Paid
+                  </button>
+                  <button
+                    onClick={() => handleStatusUpdate(alert.type, alert.id, 'uncollectible')}
+                    className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 rounded-b-lg"
+                  >
+                    Mark as Uncollectible
+                  </button>
+                </div>
+              )}
+            </div>
+            
+            <button
+              onClick={() => onNotesClick(alert)}
+              className="p-1.5 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded transition-colors"
+              title="Edit Notes"
+            >
+              <FileText className="w-4 h-4" />
+            </button>
+          </div>
+          <span className="text-xs text-gray-500">{alert.date}</span>
+        </div>
       </div>
       
       <div className="flex items-center justify-between mb-3">
@@ -238,48 +284,6 @@ const Dashboard = () => {
         </div>
       )}
 
-      <div className="flex items-center justify-between space-x-2">
-        <button
-          onClick={() => onAmountClick(alert)}
-          className="flex-1 px-3 py-1.5 bg-blue-600 text-white text-xs font-medium rounded hover:bg-blue-700 transition-colors"
-        >
-          Amount
-        </button>
-        
-        <div className="relative">
-          <button
-            onClick={() => onUpdateClick(alert.id)}
-            className="flex items-center px-3 py-1.5 bg-green-600 text-white text-xs font-medium rounded hover:bg-green-700 transition-colors"
-          >
-            Update
-            <ChevronDown className="w-3 h-3 ml-1" />
-          </button>
-          
-          {showUpdateDropdown === alert.id && (
-            <div className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-10 min-w-[120px]">
-              <button
-                onClick={() => handleStatusUpdate(alert.type, alert.id, 'paid')}
-                className="w-full px-3 py-2 text-left text-xs text-gray-700 hover:bg-gray-100 rounded-t-lg"
-              >
-                Mark as Paid
-              </button>
-              <button
-                onClick={() => handleStatusUpdate(alert.type, alert.id, 'uncollectible')}
-                className="w-full px-3 py-2 text-left text-xs text-gray-700 hover:bg-gray-100 rounded-b-lg"
-              >
-                Mark as Uncollectible
-              </button>
-            </div>
-          )}
-        </div>
-        
-        <button
-          onClick={() => onNotesClick(alert)}
-          className="flex-1 px-3 py-1.5 bg-gray-600 text-white text-xs font-medium rounded hover:bg-gray-700 transition-colors"
-        >
-          Notes
-        </button>
-      </div>
     </div>
   );
 
