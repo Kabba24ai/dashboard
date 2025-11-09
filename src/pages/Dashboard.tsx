@@ -209,8 +209,8 @@ const Dashboard = () => {
   const AlertItem = ({ alert, onAmountClick, onNotesClick, onUpdateClick, onOrderClick }) => (
     <div className="p-4 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors">
       <div className="flex items-center justify-between mb-2">
-        <h4 className="text-sm font-semibold text-gray-800">{alert.customerName}</h4>
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center justify-between w-full">
+          <h4 className="text-sm font-semibold text-gray-800">{alert.customerName}</h4>
           <div className="flex items-center space-x-2">
             <button
               onClick={() => onAmountClick(alert)}
@@ -255,11 +255,10 @@ const Dashboard = () => {
               <FileText className="w-4 h-4" />
             </button>
           </div>
-          <span className="text-xs text-gray-500">{alert.date}</span>
         </div>
       </div>
       
-      <div className="flex items-center justify-between mb-3">
+      <div className="flex items-center justify-between">
         <button
           onClick={() => onOrderClick(alert.orderId)}
           className="flex items-center text-sm text-blue-600 hover:text-blue-800 font-medium transition-colors"
@@ -267,19 +266,17 @@ const Dashboard = () => {
           {alert.orderId}
           <ExternalLink className="w-3 h-3 ml-1" />
         </button>
-        <div className="flex items-center">
-          <span className={`text-sm font-semibold ${
-            alert.amountOwed === 'Pending' 
-              ? 'text-orange-600 bg-orange-100 px-2 py-1 rounded-full' 
-              : 'text-green-700'
-          }`}>
-            {alert.amountOwed}
-          </span>
-        </div>
+        <span className={`text-sm font-semibold ${
+          alert.amountOwed === 'Pending' 
+            ? 'text-orange-600 bg-orange-100 px-2 py-1 rounded-full' 
+            : 'text-green-700'
+        }`}>
+          {alert.amountOwed}
+        </span>
       </div>
 
       {alert.notes && (
-        <div className="mb-3 p-2 bg-blue-50 border border-blue-200 rounded text-xs text-blue-800">
+        <div className="mt-3 p-2 bg-blue-50 border border-blue-200 rounded text-xs text-blue-800">
           <strong>Notes:</strong> {alert.notes}
         </div>
       )}
