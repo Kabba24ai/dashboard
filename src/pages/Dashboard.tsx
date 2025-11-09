@@ -1,9 +1,26 @@
 import React, { useState } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { Trophy, Truck, Store, Wrench, AlertTriangle, Clock, CheckCircle, TrendingUp, TrendingDown, RefreshCw, Download } from 'lucide-react';
+import { Trophy, Truck, Store, Wrench, AlertTriangle, Clock, CheckCircle, TrendingUp, TrendingDown, RefreshCw, Download, Fuel, DollarSign, X, ExternalLink } from 'lucide-react';
 
 const Dashboard = () => {
   const [salesPeriod, setSalesPeriod] = useState('rolling30');
+  const [fuelAlerts, setFuelAlerts] = useState([
+    { id: 1, customerName: 'ABC Events LLC', orderId: 'ORD-2024-001', amountOwed: 'Pending', date: '2024-01-27', type: 'fuel' },
+    { id: 2, customerName: 'Wedding Bliss Co', orderId: 'ORD-2024-002', amountOwed: '$45.00', date: '2024-01-26', type: 'fuel' },
+    { id: 3, customerName: 'Corporate Solutions', orderId: 'ORD-2024-003', amountOwed: 'Pending', date: '2024-01-25', type: 'fuel' },
+    { id: 4, customerName: 'Party Time Rentals', orderId: 'ORD-2024-004', amountOwed: '$32.50', date: '2024-01-24', type: 'fuel' },
+    { id: 5, customerName: 'Elite Celebrations', orderId: 'ORD-2024-005', amountOwed: 'Pending', date: '2024-01-23', type: 'fuel' },
+    { id: 6, customerName: 'Dream Weddings Inc', orderId: 'ORD-2024-006', amountOwed: '$28.75', date: '2024-01-22', type: 'fuel' }
+  ]);
+  
+  const [damageAlerts, setDamageAlerts] = useState([
+    { id: 1, customerName: 'Luxury Events Co', orderId: 'ORD-2024-007', amountOwed: '$150.00', date: '2024-01-27', type: 'damage' },
+    { id: 2, customerName: 'Premier Parties', orderId: 'ORD-2024-008', amountOwed: 'Pending', date: '2024-01-26', type: 'damage' },
+    { id: 3, customerName: 'Celebration Central', orderId: 'ORD-2024-009', amountOwed: '$89.99', date: '2024-01-25', type: 'damage' },
+    { id: 4, customerName: 'Event Masters LLC', orderId: 'ORD-2024-010', amountOwed: 'Pending', date: '2024-01-24', type: 'damage' },
+    { id: 5, customerName: 'Perfect Day Events', orderId: 'ORD-2024-011', amountOwed: '$225.00', date: '2024-01-23', type: 'damage' },
+    { id: 6, customerName: 'Grand Occasions', orderId: 'ORD-2024-012', amountOwed: 'Pending', date: '2024-01-22', type: 'damage' }
+  ]);
 
   // Placeholder task data
   const taskData = {
@@ -105,6 +122,106 @@ const Dashboard = () => {
     console.log(`Navigate to ${taskType} section`);
   };
 
+  const handleOrderClick = (orderId: string) => {
+    console.log(`Navigate to order ${orderId}`);
+    // This will be replaced with actual navigation to order details
+  };
+
+  const handleClearAlert = (alertType: 'fuel' | 'damage', alertId: number) => {
+    if (alertType === 'fuel') {
+      setFuelAlerts(prev => prev.filter(alert => alert.id !== alertId));
+    } else {
+      setDamageAlerts(prev => prev.filter(alert => alert.id !== alertId));
+    }
+  };
+
+  const AlertItem = ({ alert, onClear, onOrderClick }) => (
+    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors">
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center justify-between mb-1">
+          <h4 className="text-sm font-semibold text-gray-800 truncate">{alert.customerName}</h4>
+          <span className="text-xs text-gray-500 ml-2">{alert.date}</span>
+        </div>
+        <div className="flex items-center justify-between">
+          <button
+            onClick={() => onOrderClick(alert.orderId)}
+            className="flex items-center text-sm text-blue-600 hover:text-blue-800 font-medium transition-colors"
+          >
+            {alert.orderId}
+            <ExternalLink className="w-3 h-3 ml-1" />
+          </button>
+          <div className="flex items-center">
+            <span className={`text-sm font-semibold ${
+              alert.amountOwed === 'Pending' 
+                ? 'text-orange-600 bg-orange-100 px-2 py-1 rounded-full' 
+                : 'text-green-700'
+            }`}>
+              {alert.amountOwed}
+            </span>
+          </div>
+        </div>
+      </div>
+      <button
+        onClick={() => onClear(alert.type, alert.id)}
+        className="ml-3 p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-full transition-colors"
+        title="Clear Alert"
+      >
+        <X className="w-4 h-4" />
+      </button>
+    </div>
+  );
+
+  const AlertBlock = ({ title, icon: Icon, alerts, alertType, color }) => (
+    <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-300">
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center">
+          <div className={`p-2.5 rounded-lg bg-gradient-to-br ${color} mr-3`}>
+            <Icon className="w-5 h-5 text-white" />
+          </div>
+          <div>
+            <h3 className="text-lg font-semibold text-gray-800">{title}</h3>
+            <p className="text-sm text-gray-600">{alerts.length} pending alert{alerts.length !== 1 ? 's' : ''}</p>
+          </div>
+        </div>
+        <div className="flex items-center space-x-2">
+          <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+            alerts.length > 0 
+              ? 'bg-red-100 text-red-800' 
+              : 'bg-green-100 text-green-800'
+          }`}>
+            {alerts.length > 0 ? `${alerts.length} Active` : 'All Clear'}
+          </span>
+        </div>
+      </div>
+      
+      {alerts.length > 0 ? (
+        <div className="space-y-3 max-h-80 overflow-y-auto">
+          {alerts.slice(0, 5).map((alert) => (
+            <AlertItem
+              key={alert.id}
+              alert={alert}
+              onClear={handleClearAlert}
+              onOrderClick={handleOrderClick}
+            />
+          ))}
+          {alerts.length > 5 && (
+            <div className="text-center pt-2 border-t border-gray-200">
+              <span className="text-sm text-gray-500">
+                +{alerts.length - 5} more alert{alerts.length - 5 !== 1 ? 's' : ''}
+              </span>
+            </div>
+          )}
+        </div>
+      ) : (
+        <div className="text-center py-8">
+          <div className="text-gray-400 mb-2">
+            <CheckCircle className="w-12 h-12 mx-auto" />
+          </div>
+          <p className="text-gray-500">No pending alerts</p>
+        </div>
+      )}
+    </div>
+  );
   const TaskBadge = ({ icon: Icon, label, due, completed, taskType, color = "blue" }) => (
     <div 
       className="bg-white rounded-xl shadow-sm border border-gray-300 p-5 cursor-pointer hover:shadow-lg hover:border-blue-400 transition-all duration-300 group"
@@ -368,7 +485,27 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Section 2: Sales Trend Analysis */}
+        {/* Section 2: Customer Alerts */}
+        <div className="mb-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <AlertBlock
+              title="Fuel Charge Alerts"
+              icon={Fuel}
+              alerts={fuelAlerts}
+              alertType="fuel"
+              color="from-orange-500 to-orange-600"
+            />
+            <AlertBlock
+              title="New Damage Alerts"
+              icon={AlertTriangle}
+              alerts={damageAlerts}
+              alertType="damage"
+              color="from-red-500 to-red-600"
+            />
+          </div>
+        </div>
+
+        {/* Section 3: Sales Trend Analysis */}
         <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-semibold text-gray-800">Sales Trend Analysis</h2>
@@ -472,7 +609,7 @@ const Dashboard = () => {
           </ResponsiveContainer>
         </div>
 
-        {/* Section 3: Maintenance Hold Tracking */}
+        {/* Section 4: Maintenance Hold Tracking */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
           <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-300">
             <div className="flex items-center justify-between mb-6">
