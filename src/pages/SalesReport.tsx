@@ -1,25 +1,14 @@
 import React, { useState } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, BarChart, Bar, ResponsiveContainer } from 'recharts';
-import { Trophy, Truck, Store, RotateCcw, Wrench, AlertTriangle, Clock, CheckCircle, TrendingUp, TrendingDown, Download, RefreshCw } from 'lucide-react';
+import { TrendingUp, TrendingDown, Download, RefreshCw, ArrowLeft } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
-const EcommerceDashboard = () => {
+const SalesReport = () => {
   const [salesPeriod, setSalesPeriod] = useState('rolling30');
   const [categoryPeriod, setCategoryPeriod] = useState('rolling30');
   const [productPeriod, setProductPeriod] = useState('rolling30');
 
-  // Placeholder task data
-  const taskData = {
-    deliveriesTruck: { due: 0, completed: 15 },
-    deliveriesStore: { due: 3, completed: 8 },
-    returnsTruck: { due: 2, completed: 12 },
-    returnsStore: { due: 1, completed: 6 },
-    maintenanceHold: { due: 4, completed: 3 },
-    damaged: { due: 1, completed: 2 },
-    tasksOverdue: { due: 2, completed: 0 },
-    tasksDue: { due: 5, completed: 18 }
-  };
-
-  // Placeholder sales data for line chart
+  // Sales data for line chart
   const salesData = {
     rolling30: [
       { date: '6/1', current: 8500, previous: 7200 },
@@ -91,7 +80,7 @@ const EcommerceDashboard = () => {
     ]
   };
 
-  // Placeholder category data
+  // Category data
   const categoryData = {
     rolling30: [
       { name: 'Party Supplies', sales: 85000 },
@@ -167,7 +156,7 @@ const EcommerceDashboard = () => {
     ]
   };
 
-  // Placeholder product data
+  // Product data
   const productData = {
     rolling30: [
       { name: 'Round Table (8-seat)', sales: 25000 },
@@ -243,197 +232,14 @@ const EcommerceDashboard = () => {
     ]
   };
 
-  const handleTaskClick = (taskType) => {
-    // TODO: Replace with your routing/navigation logic
-    // Example integration points:
-    switch(taskType) {
-      case 'deliveries-truck':
-        // Navigate to deliveries screen with truck filter applied
-        console.log('Navigate to deliveries screen - truck filter');
-        break;
-      case 'deliveries-store':
-        // Navigate to deliveries screen with store filter applied
-        console.log('Navigate to deliveries screen - store filter');
-        break;
-      case 'returns-truck':
-        // Navigate to returns screen with truck filter applied
-        console.log('Navigate to returns screen - truck filter');
-        break;
-      case 'returns-store':
-        // Navigate to returns screen with store filter applied
-        console.log('Navigate to returns screen - store filter');
-        break;
-      case 'maintenance':
-        // Navigate to maintenance management screen
-        console.log('Navigate to maintenance screen');
-        break;
-      case 'damaged':
-        // Navigate to damaged items screen
-        console.log('Navigate to damaged items screen');
-        break;
-      case 'overdue':
-        // Navigate to all overdue tasks screen
-        console.log('Navigate to overdue tasks screen');
-        break;
-      case 'due-today':
-        // Navigate to tasks due today screen (current day only)
-        console.log('Navigate to due today tasks screen');
-        break;
-      default:
-        console.log(`Navigate to ${taskType} section`);
-    }
-  };
-
-  const TaskBadge = ({ icon: Icon, label, due, completed, taskType, color = "blue" }) => (
-    <div 
-      className="bg-white rounded-xl shadow-sm border border-gray-300 p-5 cursor-pointer hover:shadow-lg hover:border-blue-400 transition-all duration-300 group"
-      onClick={() => handleTaskClick(taskType)}
-    >
-      {/* Header with Icon and Trophy (if complete) */}
-      <div className="flex items-center justify-between mb-4">
-        <div className={`p-2.5 rounded-lg bg-gradient-to-br ${getColorGradient(color)} group-hover:scale-110 transition-transform duration-200`}>
-          <Icon className="w-5 h-5 text-white" />
-        </div>
-      </div>
-
-      {/* Task Label */}
-      <h3 className="text-sm font-semibold text-gray-800 mb-4 leading-tight">{label}</h3>
-
-      {/* Metrics Row */}
-      <div className="flex items-center">
-        {/* Start of Day (Due Tasks) */}
-        <div className="flex-1 flex flex-col items-center justify-center">
-          <div className={`text-2xl font-bold ${due === 0 ? 'text-gray-400' : 'text-red-600'} mb-1`}>
-            {due}
-          </div>
-          <div className="text-xs text-gray-500 font-medium tracking-wide text-center">
-            DUE
-          </div>
-        </div>
-
-        {/* Divider */}
-        <div className="h-12 w-px bg-gray-300"></div>
-
-        {/* Completed Tasks */}
-        <div className="flex-1 flex flex-col items-center justify-center">
-          <div className="text-2xl font-bold text-green-600 mb-1">
-            {completed}
-          </div>
-          <div className="text-xs text-gray-500 font-medium tracking-wide text-center">
-            COMPLETED
-          </div>
-        </div>
-      </div>
-
-      {/* Progress Indicator - Only show if tasks are still due */}
-      {due > 0 && (
-        <div className="mt-4 pt-3 border-t border-gray-300">
-          <div className="flex items-center justify-between text-xs text-gray-500 mb-1">
-            <span>Progress</span>
-            <span>{Math.round((completed / (completed + due)) * 100)}%</span>
-          </div>
-          <div className="w-full bg-gray-200 rounded-full h-1.5">
-            <div 
-              className={`h-1.5 rounded-full bg-gradient-to-r ${getProgressGradient(color)} transition-all duration-500`}
-              style={{ width: `${(completed / (completed + due)) * 100}%` }}
-            ></div>
-          </div>
-        </div>
-      )}
-
-      {/* Celebration Message for Completed Tasks */}
-      {due === 0 && completed > 0 && (
-        <div className="mt-4 pt-3 border-t border-gray-300">
-          <div className="flex items-center justify-center">
-            <div className="flex items-center bg-gradient-to-r from-yellow-400 to-amber-500 px-3 py-1.5 rounded-full shadow-sm">
-              <Trophy className="w-4 h-4 text-white mr-1.5" />
-              <span className="text-white font-semibold text-xs tracking-wide">ALL DONE!</span>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-
-  // Helper function for color gradients
-  const getColorGradient = (color) => {
-    const gradients = {
-      blue: 'from-blue-500 to-blue-600',
-      green: 'from-green-500 to-green-600',
-      purple: 'from-purple-500 to-purple-600',
-      indigo: 'from-indigo-500 to-indigo-600',
-      orange: 'from-orange-500 to-orange-600',
-      red: 'from-red-500 to-red-600',
-      yellow: 'from-yellow-500 to-yellow-600'
-    };
-    return gradients[color] || gradients.blue;
-  };
-
-  // Helper function for progress bar gradients
-  const getProgressGradient = (color) => {
-    const gradients = {
-      blue: 'from-blue-400 to-blue-500',
-      green: 'from-green-400 to-green-500',
-      purple: 'from-purple-400 to-purple-500',
-      indigo: 'from-indigo-400 to-indigo-500',
-      orange: 'from-orange-400 to-orange-500',
-      red: 'from-red-400 to-red-500',
-      yellow: 'from-yellow-400 to-yellow-500'
-    };
-    return gradients[color] || gradients.blue;
-  };
-
-  // Calculate sales metrics
-  const calculateSalesMetrics = (data) => {
-    const currentTotal = data.reduce((sum, item) => sum + item.current, 0);
-    const previousTotal = data.reduce((sum, item) => sum + item.previous, 0);
-    const percentChange = ((currentTotal - previousTotal) / previousTotal) * 100;
-    const avgDaily = currentTotal / data.length;
-    
-    return {
-      currentTotal,
-      previousTotal,
-      percentChange,
-      avgDaily,
-      isPositive: percentChange >= 0
-    };
-  };
-
-  const currentSalesData = salesData[salesPeriod] || salesData.rolling30;
-  const salesMetrics = calculateSalesMetrics(currentSalesData);
-
-  // Custom tooltip for enhanced information
-  const CustomTooltip = ({ active, payload, label }) => {
-    if (active && payload && payload.length) {
-      const current = payload.find(p => p.dataKey === 'current')?.value || 0;
-      const previous = payload.find(p => p.dataKey === 'previous')?.value || 0;
-      const change = ((current - previous) / previous) * 100;
-      
-      return (
-        <div className="bg-white p-4 border border-gray-200 rounded-lg shadow-lg">
-          <p className="font-semibold text-gray-800 mb-2">{label}</p>
-          <div className="space-y-1">
-            <div className="flex items-center justify-between">
-              <span className="text-blue-600">Current:</span>
-              <span className="font-medium">${current.toLocaleString()}</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-green-600">Previous:</span>
-              <span className="font-medium">${previous.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-            </div>
-            <div className="flex items-center justify-between pt-1 border-t">
-              <span className="text-gray-600">Change:</span>
-              <span className={`font-medium flex items-center ${change >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                {change >= 0 ? <TrendingUp className="w-3 h-3 mr-1" /> : <TrendingDown className="w-3 h-3 mr-1" />}
-                {change.toFixed(1)}%
-              </span>
-            </div>
-          </div>
-        </div>
-      );
-    }
-    return null;
-  };
+  const periodOptions = [
+    { value: 'rolling30', label: 'Rolling 30 Days' },
+    { value: 'currentMonth', label: 'Current Month' },
+    { value: 'lastMonth', label: 'Last Month' },
+    { value: 'currentYear', label: 'Current Year' },
+    { value: 'lastYear', label: 'Last Year' },
+    { value: 'yearComparison', label: 'Year vs Year' }
+  ];
 
   const PeriodSelector = ({ value, onChange, options }) => (
     <div className="flex space-x-2 mb-4">
@@ -453,114 +259,185 @@ const EcommerceDashboard = () => {
     </div>
   );
 
-  const periodOptions = [
-    { value: 'rolling30', label: 'Rolling 30 Days' },
-    { value: 'currentMonth', label: 'Current Month' },
-    { value: 'lastMonth', label: 'Last Month' },
-    { value: 'currentYear', label: 'Current Year' },
-    { value: 'lastYear', label: 'Last Year' },
-    { value: 'yearComparison', label: 'Year vs Year' }
-  ];
+  // Calculate sales metrics
+  const calculateSalesMetrics = (data) => {
+    const currentTotal = data.reduce((sum, item) => sum + item.current, 0);
+    const previousTotal = data.reduce((sum, item) => sum + item.previous, 0);
+    const percentChange = ((currentTotal - previousTotal) / previousTotal) * 100;
+    const avgDaily = currentTotal / data.length;
+    
+    return {
+      currentTotal,
+      previousTotal,
+      percentChange,
+      avgDaily,
+      isPositive: percentChange >= 0
+    };
+  };
+
+  // Calculate category metrics
+  const calculateCategoryMetrics = (data) => {
+    const totalSales = data.reduce((sum, item) => sum + item.sales, 0);
+    const avgSales = totalSales / data.length;
+    const topCategory = data[0];
+    const marketShare = (topCategory.sales / totalSales) * 100;
+    
+    return {
+      totalSales,
+      avgSales,
+      topCategory: topCategory.name,
+      topCategorySales: topCategory.sales,
+      marketShare
+    };
+  };
+
+  // Calculate product metrics
+  const calculateProductMetrics = (data) => {
+    const totalSales = data.reduce((sum, item) => sum + item.sales, 0);
+    const avgSales = totalSales / data.length;
+    const topProduct = data[0];
+    const marketShare = (topProduct.sales / totalSales) * 100;
+    const bottomProduct = data[data.length - 1];
+    const performanceGap = ((topProduct.sales - bottomProduct.sales) / bottomProduct.sales) * 100;
+    
+    return {
+      totalSales,
+      avgSales,
+      topProduct: topProduct.name,
+      topProductSales: topProduct.sales,
+      marketShare,
+      bottomProduct: bottomProduct.name,
+      bottomProductSales: bottomProduct.sales,
+      performanceGap
+    };
+  };
+
+  const currentSalesData = salesData[salesPeriod] || salesData.rolling30;
+  const currentCategoryData = categoryData[categoryPeriod] || categoryData.rolling30;
+  const currentProductData = productData[productPeriod] || productData.rolling30;
+
+  const salesMetrics = calculateSalesMetrics(currentSalesData);
+  const categoryMetrics = calculateCategoryMetrics(currentCategoryData);
+  const productMetrics = calculateProductMetrics(currentProductData);
+
+  // Custom tooltips
+  const CustomTooltip = ({ active, payload, label }) => {
+    if (active && payload && payload.length) {
+      const current = payload.find(p => p.dataKey === 'current')?.value || 0;
+      const previous = payload.find(p => p.dataKey === 'previous')?.value || 0;
+      const change = ((current - previous) / previous) * 100;
+      
+      return (
+        <div className="bg-white p-4 border border-gray-200 rounded-lg shadow-lg">
+          <p className="font-semibold text-gray-800 mb-2">{label}</p>
+          <div className="space-y-1">
+            <div className="flex items-center justify-between">
+              <span className="text-blue-600">Current:</span>
+              <span className="font-medium">${current.toLocaleString()}</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-green-600">Previous:</span>
+              <span className="font-medium">${previous.toLocaleString()}</span>
+            </div>
+            <div className="flex items-center justify-between pt-1 border-t">
+              <span className="text-gray-600">Change:</span>
+              <span className={`font-medium flex items-center ${change >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                {change >= 0 ? <TrendingUp className="w-3 h-3 mr-1" /> : <TrendingDown className="w-3 h-3 mr-1" />}
+                {change.toFixed(1)}%
+              </span>
+            </div>
+          </div>
+        </div>
+      );
+    }
+    return null;
+  };
+
+  const CategoryTooltip = ({ active, payload, label }) => {
+    if (active && payload && payload.length) {
+      const sales = payload[0].value;
+      const percentage = (sales / categoryMetrics.totalSales) * 100;
+      
+      return (
+        <div className="bg-white p-4 border border-gray-200 rounded-lg shadow-lg">
+          <p className="font-semibold text-gray-800 mb-2">{label}</p>
+          <div className="space-y-1">
+            <div className="flex items-center justify-between">
+              <span className="text-purple-600">Sales:</span>
+              <span className="font-medium">${sales.toLocaleString()}</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-gray-600">Market Share:</span>
+              <span className="font-medium">{percentage.toFixed(1)}%</span>
+            </div>
+            <div className="flex items-center justify-between pt-1 border-t">
+              <span className="text-gray-600">vs Average:</span>
+              <span className={`font-medium ${sales > categoryMetrics.avgSales ? 'text-green-600' : 'text-red-600'}`}>
+                {sales > categoryMetrics.avgSales ? '+' : ''}{((sales - categoryMetrics.avgSales) / categoryMetrics.avgSales * 100).toFixed(1)}%
+              </span>
+            </div>
+          </div>
+        </div>
+      );
+    }
+    return null;
+  };
+
+  const ProductTooltip = ({ active, payload, label }) => {
+    if (active && payload && payload.length) {
+      const sales = payload[0].value;
+      const percentage = (sales / productMetrics.totalSales) * 100;
+      const rank = currentProductData.findIndex(item => item.name === label) + 1;
+      
+      return (
+        <div className="bg-white p-4 border border-gray-200 rounded-lg shadow-lg">
+          <p className="font-semibold text-gray-800 mb-2">{label}</p>
+          <div className="space-y-1">
+            <div className="flex items-center justify-between">
+              <span className="text-amber-600">Sales:</span>
+              <span className="font-medium">${sales.toLocaleString()}</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-gray-600">Market Share:</span>
+              <span className="font-medium">{percentage.toFixed(1)}%</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-gray-600">Rank:</span>
+              <span className="font-medium">#{rank}</span>
+            </div>
+            <div className="flex items-center justify-between pt-1 border-t">
+              <span className="text-gray-600">vs Average:</span>
+              <span className={`font-medium ${sales > productMetrics.avgSales ? 'text-green-600' : 'text-red-600'}`}>
+                {sales > productMetrics.avgSales ? '+' : ''}{((sales - productMetrics.avgSales) / productMetrics.avgSales * 100).toFixed(1)}%
+              </span>
+            </div>
+          </div>
+        </div>
+      );
+    }
+    return null;
+  };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="p-6">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Dashboard Overview</h1>
-          <p className="text-gray-600">Rental & Sales Management System</p>
-        </div>
-
-        {/* Section 1: Task Badges */}
-        <div className="mb-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Block 1: Schedule */}
-            <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-300">
-              <div className="flex items-center mb-4">
-                <Clock className="w-6 h-6 text-blue-600 mr-3" />
-                <h3 className="text-lg font-semibold text-gray-800">Schedule</h3>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                <TaskBadge
-                  icon={Truck}
-                  label="Deliveries - Truck"
-                  due={taskData.deliveriesTruck.due}
-                  completed={taskData.deliveriesTruck.completed}
-                  taskType="deliveries-truck"
-                  color="blue"
-                />
-                <TaskBadge
-                  icon={Store}
-                  label="Deliveries - In Store"
-                  due={taskData.deliveriesStore.due}
-                  completed={taskData.deliveriesStore.completed}
-                  taskType="deliveries-store"
-                  color="green"
-                />
-                <TaskBadge
-                  icon={Truck}
-                  label="Returns - Truck"
-                  due={taskData.returnsTruck.due}
-                  completed={taskData.returnsTruck.completed}
-                  taskType="returns-truck"
-                  color="purple"
-                />
-                <TaskBadge
-                  icon={Store}
-                  label="Returns - In Store"
-                  due={taskData.returnsStore.due}
-                  completed={taskData.returnsStore.completed}
-                  taskType="returns-store"
-                  color="indigo"
-                />
-              </div>
-            </div>
-
-            {/* Block 2: Operations */}
-            <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-300">
-              <div className="flex items-center mb-4">
-                <Wrench className="w-6 h-6 text-orange-600 mr-3" />
-                <h3 className="text-lg font-semibold text-gray-800">Operations</h3>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                <TaskBadge
-                  icon={Wrench}
-                  label="Maintenance Hold"
-                  due={taskData.maintenanceHold.due}
-                  completed={taskData.maintenanceHold.completed}
-                  taskType="maintenance"
-                  color="orange"
-                />
-                <TaskBadge
-                  icon={AlertTriangle}
-                  label="Damaged Items"
-                  due={taskData.damaged.due}
-                  completed={taskData.damaged.completed}
-                  taskType="damaged"
-                  color="red"
-                />
-                <TaskBadge
-                  icon={Clock}
-                  label="Tasks Overdue"
-                  due={taskData.tasksOverdue.due}
-                  completed={taskData.tasksOverdue.completed}
-                  taskType="overdue"
-                  color="red"
-                />
-                <TaskBadge
-                  icon={CheckCircle}
-                  label="Tasks Due Today"
-                  due={taskData.tasksDue.due}
-                  completed={taskData.tasksDue.completed}
-                  taskType="due-today"
-                  color="yellow"
-                />
-              </div>
+          <div className="flex items-center mb-4">
+            <Link 
+              to="/reports" 
+              className="mr-4 p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </Link>
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">Sales Report</h1>
+              <p className="text-gray-600">Comprehensive sales analysis with trends, categories, and product performance</p>
             </div>
           </div>
         </div>
 
-        {/* Section 2: Sales Line Chart */}
+        {/* Sales Trend Analysis */}
         <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-semibold text-gray-800">Sales Trend Analysis</h2>
@@ -577,33 +454,33 @@ const EcommerceDashboard = () => {
           {/* Sales Metrics Cards */}
           <div className="flex justify-center mb-6">
             <div className="flex flex-wrap justify-center gap-4 max-w-5xl">
-            <div className="bg-blue-50 p-4 rounded-lg border border-blue-200 min-w-[168px] text-center">
-              <div className="text-xs text-gray-600 font-medium mb-1">Total Sales</div>
-              <div className="text-lg font-semibold text-blue-800 whitespace-nowrap">${salesMetrics.currentTotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
-            </div>
-            <div className="bg-green-50 p-4 rounded-lg border border-green-200 min-w-[168px] text-center">
-              <div className="text-xs text-gray-600 font-medium mb-1">Previous Period</div>
-              <div className="text-lg font-semibold text-green-800 whitespace-nowrap">${salesMetrics.previousTotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
-            </div>
-            <div className={`p-4 rounded-lg border min-w-[168px] text-center ${
-              salesMetrics.isPositive 
-                ? 'bg-emerald-50 border-emerald-200' 
-                : 'bg-red-50 border-red-200'
-            }`}>
-              <div className="text-xs text-gray-600 font-medium mb-1 text-center">
-                Growth Rate
+              <div className="bg-blue-50 p-4 rounded-lg border border-blue-200 min-w-[168px] text-center">
+                <div className="text-xs text-gray-600 font-medium mb-1">Total Sales</div>
+                <div className="text-lg font-semibold text-blue-800 whitespace-nowrap">${salesMetrics.currentTotal.toLocaleString()}</div>
               </div>
-              <div className={`text-lg font-semibold flex items-center justify-center whitespace-nowrap ${
-                salesMetrics.isPositive ? 'text-emerald-800' : 'text-red-800'
+              <div className="bg-green-50 p-4 rounded-lg border border-green-200 min-w-[168px] text-center">
+                <div className="text-xs text-gray-600 font-medium mb-1">Previous Period</div>
+                <div className="text-lg font-semibold text-green-800 whitespace-nowrap">${salesMetrics.previousTotal.toLocaleString()}</div>
+              </div>
+              <div className={`p-4 rounded-lg border min-w-[168px] text-center ${
+                salesMetrics.isPositive 
+                  ? 'bg-emerald-50 border-emerald-200' 
+                  : 'bg-red-50 border-red-200'
               }`}>
-                {salesMetrics.isPositive ? <TrendingUp className="w-4 h-4 mr-1" /> : <TrendingDown className="w-4 h-4 mr-1" />}
-                {salesMetrics.percentChange.toFixed(1)}%
+                <div className="text-xs text-gray-600 font-medium mb-1 text-center">
+                  Growth Rate
+                </div>
+                <div className={`text-lg font-semibold flex items-center justify-center whitespace-nowrap ${
+                  salesMetrics.isPositive ? 'text-emerald-800' : 'text-red-800'
+                }`}>
+                  {salesMetrics.isPositive ? <TrendingUp className="w-4 h-4 mr-1" /> : <TrendingDown className="w-4 h-4 mr-1" />}
+                  {salesMetrics.percentChange.toFixed(1)}%
+                </div>
               </div>
-            </div>
-            <div className="bg-purple-50 p-4 rounded-lg border border-purple-200 min-w-[168px] text-center">
-              <div className="text-xs text-gray-600 font-medium mb-1">Daily Average</div>
-              <div className="text-lg font-semibold text-purple-800 whitespace-nowrap">${salesMetrics.avgDaily.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
-            </div>
+              <div className="bg-purple-50 p-4 rounded-lg border border-purple-200 min-w-[168px] text-center">
+                <div className="text-xs text-gray-600 font-medium mb-1">Daily Average</div>
+                <div className="text-lg font-semibold text-purple-800 whitespace-nowrap">${salesMetrics.avgDaily.toLocaleString()}</div>
+              </div>
             </div>
           </div>
           
@@ -618,10 +495,6 @@ const EcommerceDashboard = () => {
                 <linearGradient id="currentGradient" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.3}/>
                   <stop offset="95%" stopColor="#3B82F6" stopOpacity={0.05}/>
-                </linearGradient>
-                <linearGradient id="previousGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#10B981" stopOpacity={0.2}/>
-                  <stop offset="95%" stopColor="#10B981" stopOpacity={0.05}/>
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
@@ -667,7 +540,6 @@ const EcommerceDashboard = () => {
             </LineChart>
           </ResponsiveContainer>
           
-          {/* Chart Footer with Last Updated */}
           <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">
             <div className="text-sm text-gray-500">
               Last updated: {new Date().toLocaleString()}
@@ -678,66 +550,176 @@ const EcommerceDashboard = () => {
           </div>
         </div>
 
-        {/* Section 3: Sales by Category Bar Chart */}
+        {/* Top 10 Categories by Sales */}
         <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
-          <h2 className="text-xl font-semibold text-gray-800 mb-4">Top 10 Categories by Sales</h2>
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-semibold text-gray-800">Top 10 Categories by Sales</h2>
+            <div className="flex items-center space-x-2">
+              <button className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
+                <RefreshCw className="w-4 h-4" />
+              </button>
+              <button className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
+                <Download className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+          
+          {/* Category Metrics Cards */}
+          <div className="flex justify-center mb-6">
+            <div className="flex flex-wrap justify-center gap-4 max-w-5xl">
+              <div className="bg-purple-50 p-4 rounded-lg border border-purple-200 min-w-[168px] text-center">
+                <div className="text-xs text-gray-600 font-medium mb-1">Total Sales</div>
+                <div className="text-lg font-semibold text-purple-800 whitespace-nowrap">${categoryMetrics.totalSales.toLocaleString()}</div>
+              </div>
+              <div className="bg-indigo-50 p-4 rounded-lg border border-indigo-200 min-w-[168px] text-center">
+                <div className="text-xs text-gray-600 font-medium mb-1">Average per Category</div>
+                <div className="text-lg font-semibold text-indigo-800 whitespace-nowrap">${categoryMetrics.avgSales.toLocaleString()}</div>
+              </div>
+              <div className="bg-amber-50 p-4 rounded-lg border border-amber-200 min-w-[168px] text-center">
+                <div className="text-xs text-gray-600 font-medium mb-1">Top Category</div>
+                <div className="text-lg font-semibold text-amber-800 whitespace-nowrap">{categoryMetrics.topCategory}</div>
+              </div>
+              <div className="bg-emerald-50 p-4 rounded-lg border border-emerald-200 min-w-[168px] text-center">
+                <div className="text-xs text-gray-600 font-medium mb-1">Market Share</div>
+                <div className="text-lg font-semibold text-emerald-800 whitespace-nowrap">{categoryMetrics.marketShare.toFixed(1)}%</div>
+              </div>
+            </div>
+          </div>
+          
           <PeriodSelector 
             value={categoryPeriod} 
             onChange={setCategoryPeriod} 
             options={periodOptions}
           />
           <ResponsiveContainer width="100%" height={400}>
-            <BarChart data={categoryData[categoryPeriod] || categoryData.rolling30}>
-              <CartesianGrid strokeDasharray="3 3" />
+            <BarChart data={currentCategoryData}>
+              <defs>
+                <linearGradient id="categoryGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#8B5CF6" stopOpacity={0.8}/>
+                  <stop offset="95%" stopColor="#8B5CF6" stopOpacity={0.6}/>
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
               <XAxis 
                 dataKey="name" 
                 angle={-45}
                 textAnchor="end"
                 height={100}
                 fontSize={12}
+                stroke="#64748b"
               />
-              <YAxis />
-              <Tooltip formatter={(value) => [`$${value.toLocaleString()}`, 'Sales']} />
+              <YAxis 
+                fontSize={12}
+                stroke="#64748b"
+                tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`}
+              />
+              <Tooltip content={<CategoryTooltip />} />
               <Bar 
                 dataKey="sales" 
-                fill="#8B5CF6"
+                fill="url(#categoryGradient)"
                 radius={[4, 4, 0, 0]}
+                stroke="#7C3AED"
+                strokeWidth={1}
               />
             </BarChart>
           </ResponsiveContainer>
+          
+          <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">
+            <div className="text-sm text-gray-500">
+              Showing top {currentCategoryData.length} categories
+            </div>
+            <div className="text-sm text-gray-500">
+              Last updated: {new Date().toLocaleString()}
+            </div>
+          </div>
         </div>
 
-        {/* Section 4: Sales by Product Bar Chart */}
+        {/* Top 10 Products by Sales */}
         <div className="bg-white rounded-xl shadow-lg p-6">
-          <h2 className="text-xl font-semibold text-gray-800 mb-4">Top 10 Products by Sales</h2>
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-semibold text-gray-800">Top 10 Products by Sales</h2>
+            <div className="flex items-center space-x-2">
+              <button className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
+                <RefreshCw className="w-4 h-4" />
+              </button>
+              <button className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
+                <Download className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+          
+          {/* Product Metrics Cards */}
+          <div className="flex justify-center mb-6">
+            <div className="flex flex-wrap justify-center gap-4 max-w-5xl">
+              <div className="bg-amber-50 p-4 rounded-lg border border-amber-200 min-w-[168px] text-center">
+                <div className="text-xs text-gray-600 font-medium mb-1">Total Sales</div>
+                <div className="text-lg font-semibold text-amber-800 whitespace-nowrap">${productMetrics.totalSales.toLocaleString()}</div>
+              </div>
+              <div className="bg-orange-50 p-4 rounded-lg border border-orange-200 min-w-[168px] text-center">
+                <div className="text-xs text-gray-600 font-medium mb-1">Average per Product</div>
+                <div className="text-lg font-semibold text-orange-800 whitespace-nowrap">${productMetrics.avgSales.toLocaleString()}</div>
+              </div>
+              <div className="bg-yellow-50 p-4 rounded-lg border border-yellow-200 min-w-[168px] text-center">
+                <div className="text-xs text-gray-600 font-medium mb-1">Top Product</div>
+                <div className="text-lg font-semibold text-yellow-800 whitespace-nowrap">{productMetrics.topProduct}</div>
+              </div>
+              <div className="bg-rose-50 p-4 rounded-lg border border-rose-200 min-w-[168px] text-center">
+                <div className="text-xs text-gray-600 font-medium mb-1">Performance Gap</div>
+                <div className="text-lg font-semibold text-rose-800 whitespace-nowrap">{productMetrics.performanceGap.toFixed(0)}%</div>
+              </div>
+            </div>
+          </div>
+          
           <PeriodSelector 
             value={productPeriod} 
             onChange={setProductPeriod} 
             options={periodOptions}
           />
           <ResponsiveContainer width="100%" height={400}>
-            <BarChart data={productData[productPeriod] || productData.rolling30}>
-              <CartesianGrid strokeDasharray="3 3" />
+            <BarChart data={currentProductData}>
+              <defs>
+                <linearGradient id="productGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#F59E0B" stopOpacity={0.8}/>
+                  <stop offset="95%" stopColor="#F59E0B" stopOpacity={0.6}/>
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
               <XAxis 
                 dataKey="name" 
                 angle={-45}
                 textAnchor="end"
                 height={100}
                 fontSize={12}
+                stroke="#64748b"
               />
-              <YAxis />
-              <Tooltip formatter={(value) => [`$${value.toLocaleString()}`, 'Sales']} />
+              <YAxis 
+                fontSize={12}
+                stroke="#64748b"
+                tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`}
+              />
+              <Tooltip content={<ProductTooltip />} />
               <Bar 
                 dataKey="sales" 
-                fill="#F59E0B"
+                fill="url(#productGradient)"
                 radius={[4, 4, 0, 0]}
+                stroke="#D97706"
+                strokeWidth={1}
               />
             </BarChart>
           </ResponsiveContainer>
+          
+          <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">
+            <div className="text-sm text-gray-500">
+              Showing top {currentProductData.length} products
+            </div>
+            <div className="text-sm text-gray-500">
+              Last updated: {new Date().toLocaleString()}
+            </div>
+          </div>
         </div>
       </div>
     </div>
   );
 };
 
-export default EcommerceDashboard;
+export default SalesReport;
