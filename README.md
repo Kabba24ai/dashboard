@@ -1,6 +1,6 @@
-# TaskMaster Pro - Laravel Dashboard
+# TaskMaster Pro - React Dashboard
 
-A comprehensive, production-ready dashboard for rental and sales management systems built with Laravel, Tailwind CSS, and Chart.js.
+A comprehensive, production-ready dashboard for rental and sales management systems built with React, TypeScript, Tailwind CSS, and Recharts.
 
 ## 🚀 Features
 
@@ -24,99 +24,51 @@ A comprehensive, production-ready dashboard for rental and sales management syst
 
 ## 🛠 Tech Stack
 
-- **Backend Framework**: Laravel 10
-- **Frontend**: Blade Templates with Tailwind CSS
-- **Charts**: Chart.js for data visualization
-- **Icons**: Lucide Icons
-- **Build Tool**: Vite for asset compilation
-- **Database**: MySQL (configurable)
+- **Frontend Framework**: React 18 with TypeScript
+- **Styling**: Tailwind CSS
+- **Charts**: Recharts for data visualization
+- **Icons**: Lucide React
+- **Build Tool**: Vite
+- **Development**: Hot Module Replacement (HMR)
 
 ## 📁 Project Structure
 
 ```
-app/
-├── Http/Controllers/
-│   └── DashboardController.php    # Main dashboard logic
-resources/
-├── views/
-│   ├── layouts/
-│   │   └── app.blade.php          # Main layout template
-│   └── dashboard/
-│       ├── index.blade.php        # Dashboard main view
-│       └── partials/
-│           └── task-badge.blade.php # Reusable task badge component
-├── css/
-│   └── app.css                    # Tailwind CSS and custom styles
-└── js/
-    └── app.js                     # JavaScript utilities
-public/
-└── js/
-    └── dashboard.js               # Dashboard-specific JavaScript
-routes/
-└── web.php                        # Application routes
+src/
+├── App.tsx                    # Main dashboard component
+├── Dashboard-2.tsx            # Basic version (reference)
+├── Dashboard-3.tsx            # Enhanced version (milestone)
+├── main.tsx                   # Application entry point
+├── index.css                  # Global styles and Tailwind imports
+└── vite-env.d.ts             # Vite type definitions
 ```
 
 ## 🚀 Getting Started
 
 ### Prerequisites
-- PHP 8.1+
-- Composer
-- Node.js 16+
-- MySQL or compatible database
+- Node.js 18+
+- npm or yarn
 
 ### Installation
 
-1. **Clone the repository**
-   ```bash
-   git clone <repository-url>
-   cd taskmaster-pro-laravel
-   ```
-
-2. **Install PHP dependencies**
-   ```bash
-   composer install
-   ```
-
-3. **Install Node.js dependencies**
+1. **Install dependencies**
    ```bash
    npm install
    ```
 
-4. **Environment setup**
+2. **Start development server**
    ```bash
-   cp .env.example .env
-   php artisan key:generate
+   npm run dev
    ```
 
-5. **Configure database**
-   Edit `.env` file with your database credentials:
-   ```env
-   DB_CONNECTION=mysql
-   DB_HOST=127.0.0.1
-   DB_PORT=3306
-   DB_DATABASE=taskmaster_pro
-   DB_USERNAME=root
-   DB_PASSWORD=
-   ```
-
-6. **Run database migrations**
-   ```bash
-   php artisan migrate
-   ```
-
-7. **Build assets**
+3. **Build for production**
    ```bash
    npm run build
    ```
 
-8. **Start development server**
+4. **Preview production build**
    ```bash
-   php artisan serve
-   ```
-
-9. **Start asset watcher (in another terminal)**
-   ```bash
-   npm run dev
+   npm run preview
    ```
 
 ## 📊 Dashboard Components
@@ -160,26 +112,29 @@ routes/
 - **Component Padding**: 24px (p-6) for cards, 20px (p-5) for badges
 - **Gap Spacing**: 24px (gap-6) for main sections, 16px (gap-4) for metrics
 
-## 🔧 Integration Points
+## 🔧 Customization
 
 ### Task Navigation Handlers
-```php
-// In DashboardController.php - customize these routes
-switch($taskType) {
+```typescript
+const handleTaskClick = (taskType: string) => {
+  switch(taskType) {
     case 'deliveries-truck':
-        return redirect()->route('deliveries.index', ['filter' => 'truck']);
+      // Navigate to deliveries screen with truck filter
+      break;
     case 'maintenance':
-        return redirect()->route('maintenance.index');
+      // Navigate to maintenance screen
+      break;
     // ... additional cases
-}
+  }
+};
 ```
 
 ### Data Integration
-Replace placeholder data methods in `DashboardController.php` with your actual data sources:
-- `getTaskData()` - Real-time task status from your database
-- `getSalesData()` - Sales metrics from your analytics system
-- `getCategoryData()` - Category performance data
-- `getProductData()` - Product sales information
+Replace placeholder data with your actual data sources:
+- `taskData` - Real-time task status from your API
+- `salesData` - Sales metrics from your analytics system
+- `categoryData` - Category performance data
+- `productData` - Product sales information
 
 ## 📱 Responsive Breakpoints
 
@@ -190,65 +145,27 @@ Replace placeholder data methods in `DashboardController.php` with your actual d
 
 ## 🚀 Performance Optimizations
 
-- **Lazy Loading**: AJAX data loading for charts
-- **Asset Optimization**: Vite for efficient bundling
-- **Caching**: Laravel caching for data queries
-- **CDN Ready**: Optimized for CDN deployment
+- **Vite**: Fast build tool with HMR
+- **Tree Shaking**: Automatic dead code elimination
+- **Code Splitting**: Optimized bundle sizes
+- **Lazy Loading**: Components loaded on demand
 
-## 🧪 Testing
+## 🧪 Development
 
-### Running Tests
-```bash
-php artisan test
-```
+### Available Scripts
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run preview` - Preview production build
+- `npm run lint` - Run ESLint
 
-### Frontend Testing
-```bash
-npm run test
-```
-
-## 🚀 Deployment
-
-### Production Build
-```bash
-npm run build
-php artisan config:cache
-php artisan route:cache
-php artisan view:cache
-```
-
-### Environment Variables
-Set these in your production `.env`:
-```env
-APP_ENV=production
-APP_DEBUG=false
-DASHBOARD_REFRESH_INTERVAL=30000
-DASHBOARD_ENABLE_REAL_TIME=true
-```
-
-### Deployment Platforms
-- **Laravel Forge**: Automated deployment
-- **AWS**: EC2 with RDS
-- **DigitalOcean**: App Platform or Droplets
-- **Heroku**: With ClearDB MySQL
-
-## 🤝 Contributing
-
-### Development Workflow
-1. Create feature branch from `main`
-2. Implement changes following Laravel conventions
-3. Test across all breakpoints
-4. Submit pull request with detailed description
-
-### Code Standards
-- **PSR-12**: PHP coding standards
-- **Laravel**: Follow Laravel best practices
-- **Tailwind**: Utility-first CSS approach
-- **JavaScript**: ES6+ with proper error handling
+### Code Quality
+- **TypeScript**: Full type safety
+- **ESLint**: Code linting and formatting
+- **Prettier**: Code formatting (recommended)
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the MIT License.
 
 ## 🆘 Support
 
@@ -259,4 +176,4 @@ For technical support or questions:
 
 ---
 
-**Built with ❤️ using Laravel and Tailwind CSS**
+**Built with ❤️ using React, TypeScript, and Tailwind CSS**
